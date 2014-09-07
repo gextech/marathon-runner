@@ -92,29 +92,27 @@ class MarathonCoreEngine {
       context: context
     ]
 
-    Writer originalWriter = scriptEngine.context.writer
-    Writer originalErrorWriter = scriptEngine.context.errorWriter
+    ScriptContext engineContext = new SimpleScriptContext()
+    engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
 
     if(context.writer) {
-      scriptEngine.context.writer = context.writer
+      engineContext.writer = context.writer
     }
     if(context.errorWriter) {
-      scriptEngine.context.errorWriter = context.errorWriter
+      engineContext.errorWriter = context.errorWriter
     }
 
-    scriptEngine.context.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
-    scriptEngine.context.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
-    scriptEngine.context.setAttribute(MARATHON_MODULE, context.module.moduleMap, ScriptContext.ENGINE_SCOPE)
-    scriptEngine.context.setAttribute(MARATHON_EXPORTS, context.module.moduleMap.exports, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(MARATHON_MODULE, context.module.moduleMap, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(MARATHON_EXPORTS, context.module.moduleMap.exports, ScriptContext.ENGINE_SCOPE)
 
     try {
       loadLocals(scriptEngine, context)
       String formattedCode = prepareCode(code)
-      scriptEngine.eval(formattedCode)
-      context.module.moduleMap.exports = scriptEngine.context.getAttribute(MARATHON_EXPORTS, ScriptContext.ENGINE_SCOPE)
+      scriptEngine.eval(formattedCode, engineContext)
+      context.module.moduleMap.exports = engineContext.getAttribute(MARATHON_EXPORTS, ScriptContext.ENGINE_SCOPE)
     } finally {
-      scriptEngine.context.writer = originalWriter
-      scriptEngine.context.errorWriter = originalErrorWriter
       readLocals(scriptEngine, context)
     }
   }

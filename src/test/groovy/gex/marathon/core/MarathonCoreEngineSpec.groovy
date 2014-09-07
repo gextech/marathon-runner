@@ -13,6 +13,16 @@ class MarathonCoreEngineSpec extends Specification {
       val == 10
   }
 
+  def "We can check type of arrays"() {
+    when:
+      def context = new MarathonContext(scriptName: 'something.js')
+      def engine = new MarathonCoreEngine()
+      def val = engine.eval("[] instanceof Array", context)
+
+    then:
+      val == true
+  }
+
   def "We get the correct filename in exceptions"() {
     when:
       def context = new MarathonContext(scriptName: 'something.js')

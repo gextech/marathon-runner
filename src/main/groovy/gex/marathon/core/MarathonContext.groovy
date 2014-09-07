@@ -12,6 +12,7 @@ class MarathonContext {
   String scriptName
   String scriptPath
 
+  MarathonCoreEngine engine
   MarathonPathResource scriptResource
   MarathonModuleLoader loader
   MarathonModule module

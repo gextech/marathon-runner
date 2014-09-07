@@ -1,4 +1,14 @@
 apply plugin: 'groovy'
+apply plugin: 'watch'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.bluepapa32:gradle-watch-plugin:0.1.3'
+    }
+}   
 
 dependencies {
     compile 'org.kohsuke:wordnet-random-name:1.2'
@@ -7,6 +17,7 @@ dependencies {
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
+
 repositories {
     mavenCentral()
     mavenLocal()
@@ -14,6 +25,19 @@ repositories {
     maven {
         name "expansion"
         url "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
+    }
+}
+
+watch {
+
+    groovy {
+        files files('src/main/groovy', 'src/test/groovy')
+        tasks 'compileGroovy', 'test'
+    }
+
+    resources {
+        files files('src/main/resources', 'src/test/resources')
+        tasks 'processResources', 'test'
     }
 }
 

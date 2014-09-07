@@ -12,7 +12,20 @@ class MarathonPathReaderSpec extends Specification {
       def lodash = marathonPath.resolvePath("lodash/lodash")
     then:
       lodash != null
-      lodash.type == MarathonResourceType.PATH_PARENT
+  }
+
+  def "We can load relative paths"() {
+    given:
+      def rootPath = new MarathonPathReader()
+      rootPath.addPath("src/test/resources/node_modules/")
+      def coffee = rootPath.resolvePath("coffee-script/register.js")
+      def marathonPath = new MarathonPathReader(coffee)
+
+    when:
+      def mkdirp = marathonPath.resolvePath("mkdirp/index")
+
+    then:
+      mkdirp != null
   }
 
   def "We can load paths from jars"() {
@@ -23,6 +36,20 @@ class MarathonPathReaderSpec extends Specification {
       def lodash = marathonPath.resolvePath("lodash/lodash")
     then:
       lodash != null
+  }
+
+  def "We can load relative paths from jars"() {
+    given:
+      def rootPath = new MarathonPathReader()
+      rootPath.addPath("src/test/resources/coffee-script.jar")
+      def coffee = rootPath.resolvePath("coffee-script/register.js")
+      def marathonPath = new MarathonPathReader(coffee)
+
+    when:
+      def mkdirp = marathonPath.resolvePath("mkdirp/index")
+
+    then:
+      mkdirp != null
   }
 
   def "We cannot load paths outside from marathon path"() {

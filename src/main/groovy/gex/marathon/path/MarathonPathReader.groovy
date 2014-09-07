@@ -12,13 +12,15 @@ import java.util.jar.JarFile
 
 @CompileStatic
 class MarathonPathReader {
-  private static final String PACKAGE_NAME = "Npm-Name"
+  private static final Attributes.Name PACKAGE_NAME = new Attributes.Name("Npm-Name")
 
   private List globalPaths
+  private List relativePaths
   private Map jars
   private MarathonPathResource parentResource
 
-  List defaultExtensions = ["", ".js"]
+  private List addedExtensions = ["", ".js"]
+  private List defaultLoadingPaths = ["node_modules"]
 
   MarathonPathReader() {
     this(null)
@@ -26,6 +28,7 @@ class MarathonPathReader {
 
   MarathonPathReader(MarathonPathResource parentResource) {
     globalPaths = new ArrayList<Path>()
+    relativePaths = new ArrayList<Path>()
     jars = new HashMap()
 
     if(parentResource) {
@@ -35,119 +38,79 @@ class MarathonPathReader {
 
   private void setupParentResource(MarathonPathResource parent) {
     parentResource = parent
-    if(parent.type == MarathonResourceType.PATH_PARENT) {
-      addPath(parent.path.parent.toString())
+    if(parent.originPath.fileSystem == FileSystems.default) {
+      for(String path in defaultLoadingPaths) {
+        path = parent.path.parent.toString() + File.separator + path
+        addPathToList(path, relativePaths)
+      }
     } else {
-      
+      def attrs = parent.originAttributes
+      def prependPath = attrs.get("prependPath")
+      jars.put(parent.originPath.fileSystem, attrs)
+      if(prependPath == "true") {
+        for(String path in defaultLoadingPaths) {
+          def pathFile = parent.path.fileSystem.getPath(path)
+          relativePaths.add(pathFile)
+        }
+      }
     }
   }
 
-  public void addPath(String path) {
+  void addPath(String path) {
+    addPathToList(path, globalPaths)
+  }
+
+  private void addPathToList(String path, List paths) {
     def p = FileSystems.getDefault().getPath(path)
     if(p.toFile().exists()) {
       if(p.toFile().isDirectory()) {
-        globalPaths.add(p)
+        paths.add(p)
       } else {
         JarFile j = new JarFile(p.toFile())
-        def attrs = j.manifest.mainAttributes
+        def attrs = new HashMap(j.manifest.mainAttributes)
+        attrs.put("prependPath", "true")
         def fs = FileSystems.newFileSystem(p, null)
+        p = fs.getPath(fs.separator)
         jars.put(fs, attrs)
-        globalPaths.add(fs)
+        paths.add(p)
       }
     }
-  }
-
-  public boolean fileExists(String path) {
-    fileExistsInPaths(path, globalPaths)
-  }
-
-  private boolean fileExistsInPaths(String path, List paths) {
-    Path pathFile
-    for(p in paths) {
-      if(p instanceof FileSystem) {
-        FileSystem fs = (FileSystem)p
-        Attributes attrs = (Attributes)jars.get(fs)
-        def name = attrs.getValue(PACKAGE_NAME) + "/"
-        if(path.startsWith(name)) {
-          pathFile = resolveFileSystemPath(fs, path.replace(name, ""))
-        }
-        if(!pathFile) {
-          pathFile = resolveFileSystemPath(fs, path)
-        }
-      } else {
-        pathFile = resolveSubdirPath((Path)p, path)
-      }
-      if(pathFile) {
-        def attrs = Files.readAttributes(pathFile, BasicFileAttributes.class)
-        return attrs.isRegularFile()
-      }
-    }
-    false
-  }
-
-  public boolean pathExists(String path) {
-    pathExistsInPaths(path, globalPaths)
-  }
-
-  private boolean pathExistsInPaths(String path, List paths) {
-    def pathFile
-    for(p in paths) {
-      if(p instanceof FileSystem) {
-        FileSystem fs = (FileSystem)p
-        Attributes attrs = (Attributes)jars.get(fs)
-        def name = attrs.getValue(PACKAGE_NAME) + "/"
-        if(path.startsWith(name)) {
-          pathFile = resolveFileSystemPath(fs, path.replace(name, ""))
-        }
-        if(!pathFile) {
-          pathFile = resolveFileSystemPath(fs, path)
-        }
-      } else {
-        pathFile = resolveSubdirPath((Path)p, path)
-      }
-      if(pathFile) return true
-    }
-    false
   }
 
   public MarathonPathResource resolvePath(String path) {
-    resolvePathInPaths(path, globalPaths)
+    MarathonPathResource result
+    result = resolvePathInPaths(path, relativePaths)
+    if(!result) {
+      result = resolvePathInPaths(path, globalPaths)
+    }
+    result
   }
   
-  private MarathonPathResource resolvePathInPaths(String path, List paths) {
+  private MarathonPathResource resolvePathInPaths(String path, List<Path> paths) {
     Path pathFile
-    for(p in paths) {
-      if(p instanceof FileSystem) {
-        FileSystem fs = (FileSystem)p
-        Attributes attrs = (Attributes)jars.get(fs)
-        def name = attrs.getValue(PACKAGE_NAME) + "/"
-        if(path.startsWith(name)) {
-          pathFile = resolveFileSystemPath(fs, path.replace(name, ""))
+    for(Path p in paths) {
+      String lookupPath = path
+
+      Map attrs = (Map)jars.get(p.fileSystem)
+      if(attrs) {
+        if(attrs.get(PACKAGE_NAME)) {
+          def name = attrs.get(PACKAGE_NAME).toString() + File.separator
+          if(!path.startsWith(".") && path.startsWith(name)) {
+            lookupPath = path.replace(name, "")
+          }
         }
-        if(!pathFile) {
-          pathFile = resolveFileSystemPath(fs, path)
-        }
-      } else {
-        pathFile = resolveSubdirPath((Path)p, path)
       }
+
+      pathFile = resolveSubdirPath(p, lookupPath)
       if(pathFile) {
-        FileSystem fs
-        Path originPath
-
-        if(p instanceof FileSystem) {
-          fs = (FileSystem)p
-        } else {
-          originPath = (Path)p
-        }
-
-        return new MarathonPathResource(path: pathFile, originFileSystem: fs, originPath: originPath)
+        return new MarathonPathResource(path: pathFile, originPath: p, originAttributes: attrs)
       }
     }
-    throw new IllegalArgumentException("Path ${path} not found")
+    null
   }
 
   private Path resolveFileSystemPath(FileSystem f, String path) {
-    for(it in defaultExtensions) {
+    for(it in addedExtensions) {
       def result = f.getPath(path + it)
       if(Files.exists(result)) {
         return result
@@ -157,7 +120,7 @@ class MarathonPathReader {
   }
 
   private Path resolveSubdirPath(Path p, String path) {
-    for(it in defaultExtensions) {
+    for(it in addedExtensions) {
       def result = p.resolve(path + it)
       if(Files.exists(result)) {
         def relativePath = p.relativize(result)

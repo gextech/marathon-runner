@@ -12,6 +12,7 @@ class MarathonPathReaderSpec extends Specification {
       def lodash = marathonPath.resolvePath("lodash/lodash")
     then:
       lodash != null
+      lodash.type == MarathonResourceType.PATH_PARENT
   }
 
   def "We can load paths from jars"() {

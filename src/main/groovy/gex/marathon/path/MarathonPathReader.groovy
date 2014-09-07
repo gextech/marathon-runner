@@ -14,32 +14,54 @@ import java.util.jar.JarFile
 class MarathonPathReader {
   private static final String PACKAGE_NAME = "Npm-Name"
 
-  private List paths
+  private List globalPaths
   private Map jars
+  private MarathonPathResource parentResource
 
   List defaultExtensions = ["", ".js"]
 
   MarathonPathReader() {
-    paths = new ArrayList<Path>()
+    this(null)
+  }
+
+  MarathonPathReader(MarathonPathResource parentResource) {
+    globalPaths = new ArrayList<Path>()
     jars = new HashMap()
+
+    if(parentResource) {
+      setupParentResource(parentResource)
+    }
+  }
+
+  private void setupParentResource(MarathonPathResource parent) {
+    parentResource = parent
+    if(parent.type == MarathonResourceType.PATH_PARENT) {
+      addPath(parent.path.parent.toString())
+    } else {
+      
+    }
   }
 
   public void addPath(String path) {
     def p = FileSystems.getDefault().getPath(path)
     if(p.toFile().exists()) {
       if(p.toFile().isDirectory()) {
-        paths.add(p)
+        globalPaths.add(p)
       } else {
         JarFile j = new JarFile(p.toFile())
         def attrs = j.manifest.mainAttributes
         def fs = FileSystems.newFileSystem(p, null)
         jars.put(fs, attrs)
-        paths.add(fs)
+        globalPaths.add(fs)
       }
     }
   }
 
   public boolean fileExists(String path) {
+    fileExistsInPaths(path, globalPaths)
+  }
+
+  private boolean fileExistsInPaths(String path, List paths) {
     Path pathFile
     for(p in paths) {
       if(p instanceof FileSystem) {
@@ -64,6 +86,10 @@ class MarathonPathReader {
   }
 
   public boolean pathExists(String path) {
+    pathExistsInPaths(path, globalPaths)
+  }
+
+  private boolean pathExistsInPaths(String path, List paths) {
     def pathFile
     for(p in paths) {
       if(p instanceof FileSystem) {
@@ -84,8 +110,12 @@ class MarathonPathReader {
     false
   }
 
-  public Path resolvePath(String path) {
-    def pathFile
+  public MarathonPathResource resolvePath(String path) {
+    resolvePathInPaths(path, globalPaths)
+  }
+  
+  private MarathonPathResource resolvePathInPaths(String path, List paths) {
+    Path pathFile
     for(p in paths) {
       if(p instanceof FileSystem) {
         FileSystem fs = (FileSystem)p
@@ -100,7 +130,18 @@ class MarathonPathReader {
       } else {
         pathFile = resolveSubdirPath((Path)p, path)
       }
-      if(pathFile) return pathFile
+      if(pathFile) {
+        FileSystem fs
+        Path originPath
+
+        if(p instanceof FileSystem) {
+          fs = (FileSystem)p
+        } else {
+          originPath = (Path)p
+        }
+
+        return new MarathonPathResource(path: pathFile, originFileSystem: fs, originPath: originPath)
+      }
     }
     throw new IllegalArgumentException("Path ${path} not found")
   }
@@ -129,8 +170,12 @@ class MarathonPathReader {
     null
   }
 
-  List getPaths() {
-    paths
+  MarathonPathResource getParentResource() {
+    parentResource
+  }
+
+  List getGlobalPaths() {
+    globalPaths
   }
 
 }

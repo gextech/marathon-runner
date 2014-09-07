@@ -61,16 +61,6 @@ class MarathonPathReaderSpec extends Specification {
     then:
       SecurityException ex = thrown()
   }
-
-  def "We cannot load paths outside from marathon path"() {
-    given:
-      def marathonPath = new MarathonPathReader()
-    when:
-      marathonPath.addPath("src/test/resources/node_modules/lodash/dist/")
-      marathonPath.resolvePath("../lodash")
-    then:
-      SecurityException ex = thrown()
-  }
   
   def "We can load json files"() {
     given:

@@ -2,3 +2,4 @@ path
 fs
 module
 vm
+child_process

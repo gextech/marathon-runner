@@ -49,8 +49,8 @@ class MarathonCoreEngine {
     ]
     scriptEngine.context.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
     scriptEngine.context.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
-    scriptEngine.context.setAttribute(MARATHON_MODULE, context.module, ScriptContext.ENGINE_SCOPE)
-    scriptEngine.context.setAttribute(MARATHON_EXPORTS, context.module.exports, ScriptContext.ENGINE_SCOPE)
+    scriptEngine.context.setAttribute(MARATHON_MODULE, context.module.moduleMap, ScriptContext.ENGINE_SCOPE)
+    scriptEngine.context.setAttribute(MARATHON_EXPORTS, context.module.moduleMap.exports, ScriptContext.ENGINE_SCOPE)
     try {
       String formattedCode = prepareCode(code)
       scriptEngine.eval(formattedCode)

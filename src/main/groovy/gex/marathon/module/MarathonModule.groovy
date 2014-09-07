@@ -3,9 +3,9 @@ package gex.marathon.module
 import groovy.transform.CompileStatic
 
 @CompileStatic
-class MarathonModule {
+class MarathonModule implements GroovyInterceptable {
 
-  private Map moduleMap
+  Map moduleMap
   String name
 
   MarathonModule(name, Map exports = [:]) {
@@ -15,11 +15,9 @@ class MarathonModule {
     ]
   }
 
-  Map getModuleMap() {
-    moduleMap
-  }
-
   Object getExports() {
     moduleMap.exports
   }
+
 }
+

@@ -8,6 +8,7 @@ import gex.marathon.module.MarathonModule
 
 @CompileStatic
 class MarathonContext {
+  private Map locals = [:]
   String scriptName
   String scriptPath
 
@@ -17,4 +18,16 @@ class MarathonContext {
 
   PrintWriter writer
   PrintWriter errorWriter
+
+  void put(String name, Object local) {
+    locals.put(name, local)
+  }
+
+  Object get(String name) {
+    locals.get(name)
+  }
+
+  Map getLocals() {
+    locals
+  }
 }

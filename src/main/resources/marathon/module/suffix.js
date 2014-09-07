@@ -1,2 +1,2 @@
-  exports = module.exports;
+  ;exports = module.exports;
 }).call(exports);

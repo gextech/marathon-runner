@@ -81,4 +81,22 @@ class MarathonCoreEngineSpec extends Specification {
       val['filter'][2] == 6
   }
 
+  def "We can load and then use things"() {
+    when:
+      def loader = new MarathonModuleLoader(['src/test/resources/node_modules'])
+      def context = new MarathonContext(
+        scriptName: 'something.js',
+        loader: loader)
+      def engine = new MarathonCoreEngine()
+      def code = """
+      (function () {
+        require('test/index');
+      })();
+      """
+      engine.eval(code, context)
+
+    then:
+      false
+  }
+
 }

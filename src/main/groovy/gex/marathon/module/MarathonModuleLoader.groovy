@@ -10,10 +10,11 @@ import groovy.transform.CompileStatic
 
 @CompileStatic
 class MarathonModuleLoader {
-  private Map<String, Closure> extensionLoaders
   private Map<String, MarathonModule> moduleCache
   private MarathonPathResource resource
   private MarathonPathReader reader
+
+  Map<String, Object> extensionLoaders
 
   MarathonModuleLoader(List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false) {
     extensionLoaders = new HashMap()
@@ -54,8 +55,12 @@ class MarathonModuleLoader {
         for(extension in extensionLoaders.keySet()) {
           if(filename.endsWith(extension)) {
             String source = resource.utf8Contents
-            Closure clos = extensionLoaders.get(extension)
-            MarathonModule result = (MarathonModule)clos(filename, source)
+            Object jsLoader = extensionLoaders.get(extension)
+            MarathonCoreEngine loaderEngine = new MarathonCoreEngine()
+            MarathonContext loaderContext = new MarathonContext()
+            loaderContext.put("loader", jsLoader)
+
+            MarathonModule result = (MarathonModule)loaderEngine.invokeFunction(loaderContext, "loader", filename, source)
             moduleCache.put(requirePath, result)
             break
           }
@@ -74,6 +79,7 @@ class MarathonModuleLoader {
     MarathonContext context = new MarathonContext()
     context.scriptName = filename
     context.loader = new MarathonModuleLoader(reader.globalPaths, resource, coreModule)
+    context.loader.extensionLoaders = extensionLoaders
     context.module = new MarathonModule(context.scriptName)
     MarathonCoreEngine engine = new MarathonCoreEngine()
     engine.evalModule(code, context)
@@ -86,6 +92,7 @@ class MarathonModuleLoader {
     context.scriptPath = resource.path.parent.toString()
     context.scriptResource = resource
     context.loader = new MarathonModuleLoader(reader.globalPaths, resource)
+    context.loader.extensionLoaders = extensionLoaders
     context.module = new MarathonModule(context.scriptName)
     MarathonCoreEngine engine = new MarathonCoreEngine()
     engine.evalModule(resource.utf8Contents, context)
@@ -103,5 +110,6 @@ class MarathonModuleLoader {
     context.module.moduleMap.exports = engine.eval(resource.utf8Contents, context)
     context.module
   }
+
 }
 

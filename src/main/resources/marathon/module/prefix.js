@@ -8,3 +8,6 @@
     }
     return loader.require(requirePath).exports;
   };
+  if(__marathon.context.loader) {
+    require.extensions = __marathon.context.loader.extensionLoaders;
+  }

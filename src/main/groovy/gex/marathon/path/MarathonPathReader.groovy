@@ -137,7 +137,7 @@ class MarathonPathReader {
     for(it in addedExtensions) {
       def result = p.resolve(path + it)
       if(Files.exists(result)) {
-        def relativePath = p.relativize(result)
+        def relativePath = p.toAbsolutePath().relativize(result.toAbsolutePath())
         if(relativePath.toString().contains("..")) {
           throw new SecurityException("You are trying to access a resource ${path} outside marathon path ${p}")
         }

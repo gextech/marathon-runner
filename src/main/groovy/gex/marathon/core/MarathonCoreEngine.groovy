@@ -2,8 +2,10 @@ package gex.marathon.core
 
 import groovy.transform.CompileStatic
 
+import javax.script.Bindings
 import javax.script.Invocable
 import javax.script.ScriptContext
+import javax.script.SimpleScriptContext
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
 
@@ -14,6 +16,7 @@ class MarathonCoreEngine {
   public static final String MARATHON_EXPORTS = "exports"
 
   private ScriptEngine scriptEngine
+  private Bindings commonBindings
 
   MarathonCoreEngine() {
     ScriptEngineManager engineManager = new ScriptEngineManager() 
@@ -27,34 +30,34 @@ class MarathonCoreEngine {
       def source = MarathonUtils.readResource(it)
       scriptEngine.eval(source)
     }
+    commonBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
   }
 
   Object invokeFunction(MarathonContext context, String functionName, Object... params) {
     Map marathonGlobal = [
       context: context
     ]
-    Writer originalWriter = scriptEngine.context.writer
-    Writer originalErrorWriter = scriptEngine.context.errorWriter
+    ScriptContext originalEngineContext = scriptEngine.context
+    ScriptContext engineContext = new SimpleScriptContext()
+    engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
 
     if(context.writer) {
-      scriptEngine.context.writer = context.writer
+      engineContext.writer = context.writer
     }
     if(context.errorWriter) {
-      scriptEngine.context.errorWriter = context.errorWriter
+      engineContext.errorWriter = context.errorWriter
     }
 
-    scriptEngine.context.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
-    scriptEngine.context.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
     try {
       loadLocals(scriptEngine, context)
       Invocable invocable = (Invocable)scriptEngine
+      scriptEngine.setContext(engineContext)
       invocable.invokeFunction(functionName, params)
     } finally {
-      scriptEngine.context.writer = originalWriter
-      scriptEngine.context.errorWriter = originalErrorWriter
-      scriptEngine.context.removeAttribute(ScriptEngine.FILENAME, ScriptContext.ENGINE_SCOPE)
-      scriptEngine.context.removeAttribute(MARATHON_GLOBAL, ScriptContext.ENGINE_SCOPE)
       readLocals(scriptEngine, context)
+      scriptEngine.setContext(originalEngineContext)
     }
   }
 
@@ -62,27 +65,24 @@ class MarathonCoreEngine {
     Map marathonGlobal = [
       context: context
     ]
-    Writer originalWriter = scriptEngine.context.writer
-    Writer originalErrorWriter = scriptEngine.context.errorWriter
+
+    ScriptContext engineContext = new SimpleScriptContext()
+    engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
 
     if(context.writer) {
-      scriptEngine.context.writer = context.writer
+      engineContext.writer = context.writer
     }
     if(context.errorWriter) {
-      scriptEngine.context.errorWriter = context.errorWriter
+      engineContext.errorWriter = context.errorWriter
     }
 
-    scriptEngine.context.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
-    scriptEngine.context.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
     try {
       loadLocals(scriptEngine, context)
       String formattedCode = prepareEvalCode(code)
-      scriptEngine.eval(formattedCode)
+      scriptEngine.eval(formattedCode, engineContext)
     } finally {
-      scriptEngine.context.writer = originalWriter
-      scriptEngine.context.errorWriter = originalErrorWriter
-      scriptEngine.context.removeAttribute(ScriptEngine.FILENAME, ScriptContext.ENGINE_SCOPE)
-      scriptEngine.context.removeAttribute(MARATHON_GLOBAL, ScriptContext.ENGINE_SCOPE)
       readLocals(scriptEngine, context)
     }
   }
@@ -106,6 +106,7 @@ class MarathonCoreEngine {
     scriptEngine.context.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
     scriptEngine.context.setAttribute(MARATHON_MODULE, context.module.moduleMap, ScriptContext.ENGINE_SCOPE)
     scriptEngine.context.setAttribute(MARATHON_EXPORTS, context.module.moduleMap.exports, ScriptContext.ENGINE_SCOPE)
+
     try {
       loadLocals(scriptEngine, context)
       String formattedCode = prepareCode(code)
@@ -114,10 +115,6 @@ class MarathonCoreEngine {
     } finally {
       scriptEngine.context.writer = originalWriter
       scriptEngine.context.errorWriter = originalErrorWriter
-      scriptEngine.context.removeAttribute(ScriptEngine.FILENAME, ScriptContext.ENGINE_SCOPE)
-      scriptEngine.context.removeAttribute(MARATHON_GLOBAL, ScriptContext.ENGINE_SCOPE)
-      scriptEngine.context.removeAttribute(MARATHON_MODULE, ScriptContext.ENGINE_SCOPE)
-      scriptEngine.context.removeAttribute(MARATHON_EXPORTS, ScriptContext.ENGINE_SCOPE)
       readLocals(scriptEngine, context)
     }
   }
@@ -134,7 +131,6 @@ class MarathonCoreEngine {
       context.put(
         k.toString(),
         engine.context.getAttribute(k.toString(), ScriptContext.ENGINE_SCOPE))
-      engine.context.removeAttribute(k.toString(), ScriptContext.ENGINE_SCOPE)
     }
   }
 

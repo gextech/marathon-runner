@@ -37,6 +37,10 @@ class MarathonModuleLoader {
     }
   }
 
+  MarathonPathResource requireResource(String requirePath) {
+    reader.resolvePath(requirePath)
+  }
+
   MarathonModule require(String requirePath) {
     if(moduleCache.containsKey(requirePath)) {
       return moduleCache.get(requirePath)
@@ -54,13 +58,13 @@ class MarathonModuleLoader {
       } else {
         for(extension in extensionLoaders.keySet()) {
           if(filename.endsWith(extension)) {
-            String source = resource.utf8Contents
             Object jsLoader = extensionLoaders.get(extension)
+            String fullFilename = resource.path.toAbsolutePath().normalize().toString()
             MarathonCoreEngine loaderEngine = new MarathonCoreEngine()
             MarathonContext loaderContext = new MarathonContext()
             loaderContext.put("loader", jsLoader)
 
-            MarathonModule result = (MarathonModule)loaderEngine.invokeFunction(loaderContext, "loader", filename, source)
+            MarathonModule result = (MarathonModule)loaderEngine.invokeFunction(loaderContext, "loader", loaderContext.loader, fullFilename)
             moduleCache.put(requirePath, result)
             break
           }

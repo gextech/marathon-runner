@@ -26,8 +26,6 @@ class MarathonModuleLoaderSpec extends Specification {
       def loader = new MarathonModuleLoader(["src/test/resources/node_modules/"])
       def coffee = loader.require("coffee-script/register")
 
-      println coffee
-
     then:
       coffee
   }

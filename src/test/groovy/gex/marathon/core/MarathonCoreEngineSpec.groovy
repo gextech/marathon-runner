@@ -1,5 +1,6 @@
 package gex.marathon.core
 
+import gex.marathon.module.MarathonModuleLoader
 import spock.lang.*
 
 class MarathonCoreEngineSpec extends Specification {
@@ -23,6 +24,18 @@ class MarathonCoreEngineSpec extends Specification {
       ex.fileName == "something.js"
   }
 
+  def "We can capture output"() {
+    when:
+      def strWriter = new StringWriter()
+      def context = new MarathonContext(scriptName: 'something.js',
+        writer: new PrintWriter(strWriter))
+      def engine = new MarathonCoreEngine()
+      engine.eval("console.log('Hola mundo')", context)
+
+    then:
+      strWriter.toString().trim() == 'Hola mundo'
+  }
+
   def "Scripts know their current filename"() {
     when:
       def context = new MarathonContext(scriptName: 'something.js')
@@ -41,6 +54,31 @@ class MarathonCoreEngineSpec extends Specification {
     then:
       val[5] == 6
       val["uno"] == 2
+  }
+
+  def "We can load and then use things"() {
+    when:
+      def loader = new MarathonModuleLoader(['src/test/resources/lodash.jar'])
+      def context = new MarathonContext(
+        scriptName: 'something.js',
+        loader: loader)
+      def engine = new MarathonCoreEngine()
+      def code = """
+      (function () {
+        var _ = require('lodash/lodash');
+        return {
+          every: _.every([true, 1, null, 'yes']),
+          filter: _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; })
+        };
+      })();
+      """
+      def val = engine.eval(code, context)
+
+    then:
+      val['every'] == false
+      val['filter'][0] == 2
+      val['filter'][1] == 4
+      val['filter'][2] == 6
   }
 
 }

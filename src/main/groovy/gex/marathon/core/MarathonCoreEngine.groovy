@@ -32,12 +32,24 @@ class MarathonCoreEngine {
     Map marathonGlobal = [
       context: context
     ]
+    Writer originalWriter = scriptEngine.context.writer
+    Writer originalErrorWriter = scriptEngine.context.errorWriter
+
+    if(context.writer) {
+      scriptEngine.context.writer = context.writer
+    }
+    if(context.errorWriter) {
+      scriptEngine.context.errorWriter = context.errorWriter
+    }
+
     scriptEngine.context.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
     scriptEngine.context.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
     try {
       String formattedCode = prepareEvalCode(code)
       scriptEngine.eval(formattedCode)
     } finally {
+      scriptEngine.context.writer = originalWriter
+      scriptEngine.context.errorWriter = originalErrorWriter
       scriptEngine.context.removeAttribute(ScriptEngine.FILENAME, ScriptContext.ENGINE_SCOPE)
       scriptEngine.context.removeAttribute(MARATHON_GLOBAL, ScriptContext.ENGINE_SCOPE)
     }
@@ -47,6 +59,17 @@ class MarathonCoreEngine {
     Map marathonGlobal = [
       context: context
     ]
+
+    Writer originalWriter = scriptEngine.context.writer
+    Writer originalErrorWriter = scriptEngine.context.errorWriter
+
+    if(context.writer) {
+      scriptEngine.context.writer = context.writer
+    }
+    if(context.errorWriter) {
+      scriptEngine.context.errorWriter = context.errorWriter
+    }
+
     scriptEngine.context.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
     scriptEngine.context.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
     scriptEngine.context.setAttribute(MARATHON_MODULE, context.module.moduleMap, ScriptContext.ENGINE_SCOPE)
@@ -56,6 +79,8 @@ class MarathonCoreEngine {
       scriptEngine.eval(formattedCode)
       context.module.moduleMap.exports = scriptEngine.context.getAttribute(MARATHON_EXPORTS, ScriptContext.ENGINE_SCOPE)
     } finally {
+      scriptEngine.context.writer = originalWriter
+      scriptEngine.context.errorWriter = originalErrorWriter
       scriptEngine.context.removeAttribute(ScriptEngine.FILENAME, ScriptContext.ENGINE_SCOPE)
       scriptEngine.context.removeAttribute(MARATHON_GLOBAL, ScriptContext.ENGINE_SCOPE)
       scriptEngine.context.removeAttribute(MARATHON_MODULE, ScriptContext.ENGINE_SCOPE)
@@ -69,7 +94,7 @@ class MarathonCoreEngine {
     StringBuilder builder = new StringBuilder()
     builder.append(prefix)
     builder.append(" return ")
-    builder.append(code)
+    builder.append(code.trim())
     builder.append(suffix)
     builder.toString()
   }

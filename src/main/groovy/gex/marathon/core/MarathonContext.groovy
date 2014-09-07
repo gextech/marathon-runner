@@ -14,4 +14,7 @@ class MarathonContext {
   MarathonPathResource scriptResource
   MarathonModuleLoader loader
   MarathonModule module
+
+  PrintWriter writer
+  PrintWriter errorWriter
 }

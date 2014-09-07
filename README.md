@@ -14,4 +14,5 @@ Now let's list our specific goals:
 * To be able to use CommonJS
 * To mimic NodeJS dependency resolution
 * To make reactive extensions interoperable with java
+* Just enough node to run coffee
 

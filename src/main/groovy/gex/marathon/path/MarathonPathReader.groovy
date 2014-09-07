@@ -19,7 +19,7 @@ class MarathonPathReader {
   private Map jars
   private MarathonPathResource parentResource
 
-  private List addedExtensions = ["", ".js"]
+  private List addedExtensions = ["", ".js", ".json"]
   private List defaultLoadingPaths = ["node_modules"]
 
   MarathonPathReader() {
@@ -79,9 +79,23 @@ class MarathonPathReader {
 
   public MarathonPathResource resolvePath(String path) {
     MarathonPathResource result
-    result = resolvePathInPaths(path, relativePaths)
-    if(!result) {
-      result = resolvePathInPaths(path, globalPaths)
+    if(path.startsWith("./") && parentResource) {
+      def fs = parentResource.originPath.fileSystem
+      Path rootPath
+      if(fs != FileSystems.getDefault()) {
+        rootPath = fs.getPath(fs.separator)
+      } else {
+        rootPath = parentResource.path
+        if(rootPath.toFile().isFile()) {
+          rootPath = rootPath.parent
+        }
+      }
+      result = resolvePathInPaths(path, [rootPath])
+    } else {
+      result = resolvePathInPaths(path, relativePaths)
+      if(!result) {
+        result = resolvePathInPaths(path, globalPaths)
+      }
     }
     result
   }
@@ -95,7 +109,7 @@ class MarathonPathReader {
       if(attrs) {
         if(attrs.get(PACKAGE_NAME)) {
           def name = attrs.get(PACKAGE_NAME).toString() + File.separator
-          if(!path.startsWith(".") && path.startsWith(name)) {
+          if(path.startsWith(name)) {
             lookupPath = path.replace(name, "")
           }
         }

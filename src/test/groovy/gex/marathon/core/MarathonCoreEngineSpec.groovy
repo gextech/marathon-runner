@@ -100,13 +100,18 @@ class MarathonCoreEngineSpec extends Specification {
         loader: loader)
       def code = """
       (function () {
-        require('test/index');
+        var test = require('test/index');
+        return test.cubes;
       })();
       """
-      engine.eval(code, context)
+      def cubes = engine.eval(code, context)
 
     then:
-      false
+      cubes[0] == 1
+      cubes[1] == 8
+      cubes[2] == 27
+      cubes[3] == 64
+      cubes[4] == 125
   }
 
 }

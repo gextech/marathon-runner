@@ -62,11 +62,21 @@ class MarathonModuleLoader {
           if(filename.endsWith(extension)) {
             Object jsLoader = extensionLoaders.get(extension)
             String fullFilename = resource.path.toAbsolutePath().normalize().toString()
-            // MarathonCoreEngine loaderEngine = new MarathonCoreEngine()
             MarathonContext loaderContext = new MarathonContext()
+            loaderContext.loader = this
+            loaderContext.put("__fullFilename", jsLoader)
+            loaderContext.put("__loaderContext", loaderContext)
             loaderContext.put("__loader", jsLoader)
 
-            MarathonModule result = (MarathonModule)engine.invokeFunction(loaderContext, "__loader", loaderContext.loader, fullFilename)
+            def jsModule = engine.eval("""
+            {
+              "_compile": function loadCustomExtension(source) {
+                return __loaderContext.loader.compileJs(__fullFilename, source);
+              }
+            }
+            """, loaderContext)
+
+            MarathonModule result = (MarathonModule)engine.invokeFunction(loaderContext, "__loader", jsModule, fullFilename)
             moduleCache.put(requirePath, result)
             break
           }
@@ -81,7 +91,7 @@ class MarathonModuleLoader {
     throw new IllegalArgumentException("Module ${requirePath} cannot be loaded")
   }
 
-  private MarathonModule compileJs(String filename, String code, boolean coreModule = false) {
+  public MarathonModule compileJs(String filename, String code, boolean coreModule = false) {
     MarathonContext context = new MarathonContext()
     context.scriptName = filename
     context.loader = new MarathonModuleLoader(engine, reader.globalPaths, resource, coreModule)
@@ -91,7 +101,7 @@ class MarathonModuleLoader {
     context.module
   }
 
-  private MarathonModule compileJs(MarathonPathResource resource) {
+  public MarathonModule compileJs(MarathonPathResource resource) {
     MarathonContext context = new MarathonContext()
     context.scriptName = resource.path.fileName.toString()
     context.scriptPath = resource.path.parent.toString()

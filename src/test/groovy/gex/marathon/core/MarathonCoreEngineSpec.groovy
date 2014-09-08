@@ -91,7 +91,7 @@ class MarathonCoreEngineSpec extends Specification {
       val['filter'][2] == 6
   }
 
-  def "We can load and then use things"() {
+  def "We can load and then use things, even in coffeescript yei"() {
     when:
       def engine = new MarathonCoreEngine()
       def loader = new MarathonModuleLoader(engine, ['src/test/resources/node_modules'])

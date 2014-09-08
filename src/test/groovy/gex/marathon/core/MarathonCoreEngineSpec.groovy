@@ -68,11 +68,11 @@ class MarathonCoreEngineSpec extends Specification {
 
   def "We can load and then use things"() {
     when:
-      def loader = new MarathonModuleLoader(['src/test/resources/lodash.jar'])
+      def engine = new MarathonCoreEngine()
+      def loader = new MarathonModuleLoader(engine, ['src/test/resources/lodash.jar'])
       def context = new MarathonContext(
         scriptName: 'something.js',
         loader: loader)
-      def engine = new MarathonCoreEngine()
       def code = """
       (function () {
         var _ = require('lodash/lodash');
@@ -93,11 +93,11 @@ class MarathonCoreEngineSpec extends Specification {
 
   def "We can load and then use things"() {
     when:
-      def loader = new MarathonModuleLoader(['src/test/resources/node_modules'])
+      def engine = new MarathonCoreEngine()
+      def loader = new MarathonModuleLoader(engine, ['src/test/resources/node_modules'])
       def context = new MarathonContext(
         scriptName: 'something.js',
         loader: loader)
-      def engine = new MarathonCoreEngine()
       def code = """
       (function () {
         require('test/index');

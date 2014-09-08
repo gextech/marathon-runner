@@ -15,12 +15,15 @@ class MarathonCoreEngine {
   public static final String MARATHON_MODULE = "module"
   public static final String MARATHON_EXPORTS = "exports"
 
+  private List<Map> contextStack
+
   private ScriptEngine scriptEngine
   private Bindings commonBindings
 
   MarathonCoreEngine() {
     ScriptEngineManager engineManager = new ScriptEngineManager() 
     this.scriptEngine = engineManager.getEngineByName("javascript")
+    contextStack = new ArrayList()
     loadDefault()
   }
 
@@ -33,31 +36,51 @@ class MarathonCoreEngine {
     commonBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
   }
 
+  private void pushStack() {
+    Map currentStack = new HashMap()
+    ScriptContext currentContext = scriptEngine.context
+
+    currentStack.put("__writer", currentContext.writer)
+    currentStack.put("__errorWriter", currentContext.errorWriter)
+
+    currentContext.getBindings(ScriptContext.ENGINE_SCOPE).each { k, v ->
+      currentStack.put(k, v)
+    }
+
+    contextStack.push(currentStack)
+  }
+
+  private void popStack() {
+    Map previousStack = contextStack.pop()
+
+    def writer = previousStack.get("__writer")
+    def errorWriter = previousStack.get("__errorWriter")
+
+    previousStack.remove("__writer")
+    previousStack.remove("__errorWriter")
+
+    previousStack.each { k, v ->
+      scriptEngine.context.setAttribute(
+        k.toString(),
+        v,
+        ScriptContext.ENGINE_SCOPE)
+    }
+
+  }
+
   Object invokeFunction(MarathonContext context, String functionName, Object... params) {
     Map marathonGlobal = [
       context: context
     ]
-    ScriptContext originalEngineContext = scriptEngine.context
-    ScriptContext engineContext = new SimpleScriptContext()
-    engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
+    pushStack()
 
-    if(context.writer) {
-      engineContext.writer = context.writer
-    }
-    if(context.errorWriter) {
-      engineContext.errorWriter = context.errorWriter
-    }
-
-    engineContext.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
-    engineContext.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
     try {
       loadLocals(scriptEngine, context)
       Invocable invocable = (Invocable)scriptEngine
-      scriptEngine.setContext(engineContext)
       invocable.invokeFunction(functionName, params)
     } finally {
       readLocals(scriptEngine, context)
-      scriptEngine.setContext(originalEngineContext)
+      popStack()
     }
   }
 
@@ -67,7 +90,9 @@ class MarathonCoreEngine {
     ]
 
     ScriptContext engineContext = new SimpleScriptContext()
+    engineContext = scriptEngine.context
     engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
+    pushStack()
 
     if(context.writer) {
       engineContext.writer = context.writer
@@ -81,9 +106,10 @@ class MarathonCoreEngine {
     try {
       loadLocals(scriptEngine, context)
       String formattedCode = prepareEvalCode(code)
-      scriptEngine.eval(formattedCode, engineContext)
+      scriptEngine.eval(formattedCode)
     } finally {
       readLocals(scriptEngine, context)
+      popStack()
     }
   }
 
@@ -93,7 +119,11 @@ class MarathonCoreEngine {
     ]
 
     ScriptContext engineContext = new SimpleScriptContext()
+    engineContext = scriptEngine.context
     engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
+
+    pushStack();
+
 
     if(context.writer) {
       engineContext.writer = context.writer
@@ -110,10 +140,11 @@ class MarathonCoreEngine {
     try {
       loadLocals(scriptEngine, context)
       String formattedCode = prepareCode(code)
-      scriptEngine.eval(formattedCode, engineContext)
+      scriptEngine.eval(formattedCode)
       context.module.moduleMap.exports = engineContext.getAttribute(MARATHON_EXPORTS, ScriptContext.ENGINE_SCOPE)
     } finally {
       readLocals(scriptEngine, context)
+      popStack();
     }
   }
 

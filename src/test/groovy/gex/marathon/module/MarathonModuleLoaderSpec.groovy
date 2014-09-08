@@ -1,11 +1,13 @@
 package gex.marathon.module
 
+import gex.marathon.core.*
 import spock.lang.*
 
 class MarathonModuleLoaderSpec extends Specification {
   def "Can load a json file"() {
     when:
-      def loader = new MarathonModuleLoader(["src/test/resources/node_modules/"])
+      def engine = new MarathonCoreEngine()
+      def loader = new MarathonModuleLoader(engine, ["src/test/resources/node_modules/"])
       def testModule = loader.require("coffee-script/test")
 
     then:
@@ -14,7 +16,8 @@ class MarathonModuleLoaderSpec extends Specification {
   
   def "Can load a simple js file"() {
     when:
-      def loader = new MarathonModuleLoader(["src/test/resources/node_modules/"])
+      def engine = new MarathonCoreEngine()
+      def loader = new MarathonModuleLoader(engine, ["src/test/resources/node_modules/"])
       def lodash = loader.require("lodash/dist/lodash.js")
 
     then:
@@ -23,7 +26,8 @@ class MarathonModuleLoaderSpec extends Specification {
 
   def "Can load coffee-script"() {
     when:
-      def loader = new MarathonModuleLoader(["src/test/resources/node_modules/"])
+      def engine = new MarathonCoreEngine()
+      def loader = new MarathonModuleLoader(engine, ["src/test/resources/node_modules/"])
       def coffee = loader.require("coffee-script/register")
 
     then:

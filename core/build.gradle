@@ -1,4 +1,3 @@
-apply plugin: 'groovy'
 apply plugin: 'watch'
 
 buildscript {
@@ -12,21 +11,8 @@ buildscript {
 
 dependencies {
     compile 'org.kohsuke:wordnet-random-name:1.2'
-    compile 'org.codehaus.groovy:groovy-all:2.3.6'
-
-    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-
-    maven {
-        name "expansion"
-        url "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
-    }
-}
 
 watch {
 

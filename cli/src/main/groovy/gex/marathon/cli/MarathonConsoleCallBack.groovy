@@ -11,9 +11,11 @@ import org.jboss.aesh.console.Console;
  */
 class MarathonConsoleCallBack implements ConsoleCallback {
   Console console
+  MarathonRunner runner
 
 
   MarathonConsoleCallBack(Console console){
+    this.runner = new MarathonRunner()
     this.console = console
   }
 
@@ -21,7 +23,8 @@ class MarathonConsoleCallBack implements ConsoleCallback {
   public int execute(ConsoleOperation output) {
     def input = output.getBuffer()
 
-    def runner = new MarathonRunner()
+
+
     def retValue = runner.eval(input)
 
     console.getShell().out().println("======> $retValue");

@@ -109,6 +109,7 @@ class MarathonCoreEngine {
     try {
       loadLocals(scriptEngine, context)
       scriptEngine.eval(getRequireCode())
+
       retValue = scriptEngine.eval(code)
       scriptEngine.getContext().setAttribute("require", null, ScriptContext.ENGINE_SCOPE)
     } finally {

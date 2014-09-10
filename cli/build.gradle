@@ -1,6 +1,13 @@
 apply plugin: 'watch'
 apply plugin: 'com.github.johnrengelman.shadow'
 
+
+jar {
+  manifest {
+    attributes("Main-Class": 'gex.marathon.cli.MarathonCli')
+  }
+}
+
 buildscript {
     repositories {
         jcenter()
@@ -13,8 +20,8 @@ buildscript {
 
 dependencies {
     compile 'org.jboss.aesh:aesh:0.56'
+    compile( project( ':core' ) )
 }
-
 
 watch {
 

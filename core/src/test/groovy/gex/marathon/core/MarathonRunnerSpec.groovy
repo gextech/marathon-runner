@@ -1,13 +1,12 @@
 package gex.marathon.core
 
-import gex.marathon.module.MarathonModuleLoader
 import spock.lang.*
 
 class MarathonRunnerSpec extends Specification {
   def "We can eval simple values"() {
     when:
       def runner = new MarathonRunner()
-      def a = runner.evalValue("5 + 5")
+      def a = runner.eval("5 + 5")
 
     then:
       a == 10
@@ -17,7 +16,6 @@ class MarathonRunnerSpec extends Specification {
     when:
       def runner = new MarathonRunner()
       runner.eval("var a = 5 + 5")
-
     then:
       runner.get("a") == 10
   }
@@ -36,6 +34,24 @@ class MarathonRunnerSpec extends Specification {
       a[1] == 6
       a[2] == 9
   }
+
+
+  def "We can follow up various steps, testing cli mode"(){
+    given:
+      def runner = new MarathonRunner()
+      def x
+    when:
+      x = runner.eval("var a = 5 + 5")
+    then:
+      x == null
+
+    when:
+      x = runner.eval("a")
+    then:
+      x == 10
+  }
+
+
 
 }
 

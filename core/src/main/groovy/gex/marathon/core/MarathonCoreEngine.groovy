@@ -84,10 +84,12 @@ class MarathonCoreEngine {
     }
   }
 
-  void evalGlobal(String code, MarathonContext context = new MarathonContext()) {
+  Object evalGlobal(String code, MarathonContext context = new MarathonContext()) {
     Map marathonGlobal = [
       context: context
     ]
+
+    def retValue
 
     ScriptContext engineContext = new SimpleScriptContext()
     engineContext = scriptEngine.context
@@ -103,15 +105,21 @@ class MarathonCoreEngine {
 
     engineContext.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
     engineContext.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
+
     try {
       loadLocals(scriptEngine, context)
-      String formattedCode = prepareGlobalCode(code)
-      scriptEngine.eval(formattedCode)
+      scriptEngine.eval(getRequireCode())
+      retValue = scriptEngine.eval(code)
+      scriptEngine.getContext().setAttribute("require", null, ScriptContext.ENGINE_SCOPE)
     } finally {
       readLocals(scriptEngine, context)
       popStack()
     }
+
+    retValue
   }
+
+
 
   Object eval(String code, MarathonContext context = new MarathonContext()) {
     Map marathonGlobal = [
@@ -192,6 +200,13 @@ class MarathonCoreEngine {
     }
   }
 
+
+  private String getRequireCode(){
+    String require = MarathonUtils.readResource("/marathon/module/globalRequire.js").replaceAll("\n", " ")
+    require
+  }
+
+
   private String prepareEvalCode(String code) {
     String prefix = MarathonUtils.readResource("/marathon/module/prefix.js").replaceAll("\n", " ")
     String suffix = MarathonUtils.readResource("/marathon/module/evalSuffix.js")
@@ -200,14 +215,6 @@ class MarathonCoreEngine {
     builder.append(" return ")
     builder.append(code.replaceAll("^\\s+",""))
     builder.append(suffix)
-    builder.toString()
-  }
-
-  private String prepareGlobalCode(String code) {
-    String prefix = MarathonUtils.readResource("/marathon/module/globalPrefix.js").replaceAll("\n", " ")
-    StringBuilder builder = new StringBuilder()
-    builder.append(prefix)
-    builder.append(code)
     builder.toString()
   }
 

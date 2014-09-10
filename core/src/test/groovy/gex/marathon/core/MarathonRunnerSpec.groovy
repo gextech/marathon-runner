@@ -4,6 +4,15 @@ import gex.marathon.module.MarathonModuleLoader
 import spock.lang.*
 
 class MarathonRunnerSpec extends Specification {
+  def "We can eval simple values"() {
+    when:
+      def runner = new MarathonRunner()
+      def a = runner.evalValue("5 + 5")
+
+    then:
+      a == 10
+  }
+
   def "We can execute by creating a runner"() {
     when:
       def runner = new MarathonRunner()

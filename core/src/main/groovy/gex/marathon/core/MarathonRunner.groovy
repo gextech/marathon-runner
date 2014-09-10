@@ -15,10 +15,13 @@ class MarathonRunner {
     context.loader = loader
   }
 
-  Object eval(String code) {
+  void eval(String code) {
     engine.evalGlobal(code, context)
   }
 
+  Object evalValue(String code) {
+    engine.eval(code, context)
+  }
 
   MarathonModuleLoader getLoader() {
     loader

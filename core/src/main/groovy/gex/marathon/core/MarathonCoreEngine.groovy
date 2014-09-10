@@ -84,7 +84,7 @@ class MarathonCoreEngine {
     }
   }
 
-  Object evalGlobal(String code, MarathonContext context = new MarathonContext()) {
+  void evalGlobal(String code, MarathonContext context = new MarathonContext()) {
     Map marathonGlobal = [
       context: context
     ]

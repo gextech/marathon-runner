@@ -84,6 +84,35 @@ class MarathonCoreEngine {
     }
   }
 
+  Object evalGlobal(String code, MarathonContext context = new MarathonContext()) {
+    Map marathonGlobal = [
+      context: context
+    ]
+
+    ScriptContext engineContext = new SimpleScriptContext()
+    engineContext = scriptEngine.context
+    engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
+    pushStack()
+
+    if(context.writer) {
+      engineContext.writer = context.writer
+    }
+    if(context.errorWriter) {
+      engineContext.errorWriter = context.errorWriter
+    }
+
+    engineContext.setAttribute(ScriptEngine.FILENAME, context.scriptName, ScriptContext.ENGINE_SCOPE)
+    engineContext.setAttribute(MARATHON_GLOBAL, marathonGlobal, ScriptContext.ENGINE_SCOPE)
+    try {
+      loadLocals(scriptEngine, context)
+      String formattedCode = prepareGlobalCode(code)
+      scriptEngine.eval(formattedCode)
+    } finally {
+      readLocals(scriptEngine, context)
+      popStack()
+    }
+  }
+
   Object eval(String code, MarathonContext context = new MarathonContext()) {
     Map marathonGlobal = [
       context: context
@@ -174,6 +203,14 @@ class MarathonCoreEngine {
     builder.toString()
   }
 
+  private String prepareGlobalCode(String code) {
+    String prefix = MarathonUtils.readResource("/marathon/module/globalPrefix.js").replaceAll("\n", " ")
+    StringBuilder builder = new StringBuilder()
+    builder.append(prefix)
+    builder.append(code)
+    builder.toString()
+  }
+
   private String prepareCode(String code) {
     String prefix = MarathonUtils.readResource("/marathon/module/prefix.js").replaceAll("\n", " ")
     String suffix = MarathonUtils.readResource("/marathon/module/suffix.js")
@@ -183,5 +220,14 @@ class MarathonCoreEngine {
     builder.append(suffix)
     builder.toString()
   }
+
+  void put(String name, Object value) {
+    scriptEngine.context.setAttribute(name, value, ScriptContext.ENGINE_SCOPE)
+  }
+
+  Object get(String name) {
+    scriptEngine.context.getAttribute(name)
+  }
+
 }
 

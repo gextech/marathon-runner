@@ -124,5 +124,9 @@ class MarathonModuleLoader {
     context.module
   }
 
+  public List<String> getMarathonPath() {
+    reader.globalPaths
+  }
+
 }
 

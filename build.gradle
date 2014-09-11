@@ -12,10 +12,13 @@ subprojects {
         testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
     }   
 
+    def deploymentRepo = version.endsWith("-SNAPSHOT")?"http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/snapshots/":
+        "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
+
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/snapshots/") {
+                repository(url: deploymentRepo) {
                     authentication(userName: nexusUsername, password: nexusPassword)
                 }
                 pom.version = project.version

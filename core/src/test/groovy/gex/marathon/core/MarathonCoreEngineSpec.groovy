@@ -75,7 +75,7 @@ class MarathonCoreEngineSpec extends Specification {
         loader: loader)
       def code = """
       (function () {
-        var _ = require('lodash/lodash');
+        var _ = require('lodash');
         return {
           every: _.every([true, 1, null, 'yes']),
           filter: _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; })
@@ -100,7 +100,7 @@ class MarathonCoreEngineSpec extends Specification {
         loader: loader)
       def code = """
       (function () {
-        var test = require('test/index');
+        var test = require('test');
         return test.cubes;
       })();
       """

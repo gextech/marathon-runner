@@ -7,6 +7,9 @@ import gex.marathon.path.MarathonPathReader
 import gex.marathon.path.MarathonPathResource
 
 import groovy.transform.CompileStatic
+import groovy.json.JsonSlurper
+
+import java.util.jar.Manifest
 
 @CompileStatic
 class MarathonModuleLoader {
@@ -39,9 +42,46 @@ class MarathonModuleLoader {
     }
   }
 
+  private MarathonPathResource requireMainResource(
+    String requirePath,
+    MarathonPathResource metaInf,
+    MarathonPathResource packageJson) {
+    def mainPath
+    if(metaInf) {
+      def manifest = new Manifest(metaInf.inputStream)
+      def npmMain = manifest.mainAttributes.getValue("Npm-Main")
+      if(npmMain) {
+        mainPath = "${requirePath}/${npmMain}" 
+      }
+    } else {
+      def slurper = new JsonSlurper()
+      def json = (Map)slurper.parseText(packageJson.utf8Contents)
+      def npmMain = json.main
+      if(npmMain) {
+        mainPath = "${requirePath}/${npmMain}" 
+      }
+    }
+
+    if(!mainPath) {
+      mainPath = "${requirePath}/index.js"
+    }
+
+    return reader.resolvePath(mainPath)
+  }
+
   MarathonPathResource requireResource(String requirePath) {
+    MarathonPathResource result
     reader.addExtensions(extensionLoaders.keySet())
-    reader.resolvePath(requirePath)
+    result = reader.resolvePath(requirePath)
+      
+    if(result && result.isDirectory() && !requirePath.startsWith(".")) {
+      MarathonPathResource metaInf = reader.resolvePath("${requirePath}/META-INF/MANIFEST.MF")
+      MarathonPathResource packageJson = reader.resolvePath("${requirePath}/package.json")
+
+      result = requireMainResource(requirePath, metaInf, packageJson)
+    }
+
+    result
   }
 
   MarathonModule require(String requirePath) {

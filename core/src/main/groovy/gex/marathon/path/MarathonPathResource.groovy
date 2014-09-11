@@ -12,8 +12,16 @@ class MarathonPathResource {
   Path originPath
   Map originAttributes
 
+  InputStream getInputStream() {
+    Files.newInputStream(path)
+  }
+
   String getUtf8Contents() {
     Files.readAllLines(path).join("\n")
+  }
+
+  boolean isDirectory() {
+    Files.isDirectory(path)
   }
 
   byte[] getByteContents() {

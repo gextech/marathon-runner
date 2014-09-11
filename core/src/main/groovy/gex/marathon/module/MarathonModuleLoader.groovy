@@ -166,6 +166,14 @@ class MarathonModuleLoader {
     context.module
   }
 
+  public void setupMarathonPath(List<String> marathonPath) {
+    reader.clearPath()
+
+    for(String path : marathonPath) {
+      reader.addPath(path)
+    }
+  }
+
   public List<String> getMarathonPath() {
     reader.globalPaths
   }

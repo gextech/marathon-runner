@@ -63,6 +63,11 @@ class MarathonPathReader {
     addPathToList(path, globalPaths)
   }
 
+  void clearPath() {
+    globalPaths.clear()
+    jars.clear()
+  }
+
   private void addPathToList(String path, List paths) {
     def p = FileSystems.getDefault().getPath(path)
     if(p.toFile().exists()) {

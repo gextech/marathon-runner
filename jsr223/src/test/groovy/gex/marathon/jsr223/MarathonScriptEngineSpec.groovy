@@ -62,4 +62,20 @@ class MarathonScriptEngineSpec extends Specification {
       sum == null
   }
 
+  def "We can load with path in node modules"() {
+    when:
+      def manager = new ScriptEngineManager()
+      def context = new SimpleScriptContext()
+      context.setAttribute("__MARATHON_PATH__", ["../core/src/test/resources/node_modules"], ScriptContext.ENGINE_SCOPE)
+      def engine = manager.getEngineByName("marathon")
+      engine.eval("var _ = require('lodash')", context)
+      def test = engine.eval("_.range(4)")
+
+    then:
+      test[0] == 0
+      test[1] == 1
+      test[2] == 2
+      test[3] == 3
+  }
+
 }

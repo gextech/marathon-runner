@@ -24,7 +24,12 @@ class MarathonScriptEngine extends AbstractScriptEngine {
 
   @Override
   Object eval(String code, ScriptContext context) {
-    MarathonContext marathonContext = new MarathonScriptContext(context)
+    MarathonContext marathonContext = new MarathonScriptContext(context, runner.loader)
+    List<String> marathonPath = (List<String>)marathonContext.get(MarathonScriptContext.MARATHON_PATH)
+    if(marathonPath) {
+      runner.loader.setupMarathonPath(marathonPath)
+      marathonContext.put(MarathonScriptContext.MARATHON_PATH, null)
+    }
     runner.eval(code, marathonContext)
   }
 

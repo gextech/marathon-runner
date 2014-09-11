@@ -22,7 +22,7 @@ class MarathonCoreEngine {
 
   MarathonCoreEngine() {
     ScriptEngineManager engineManager = new ScriptEngineManager() 
-    this.scriptEngine = engineManager.getEngineByName("javascript")
+    this.scriptEngine = engineManager.getEngineByName("nashorn")
     contextStack = new ArrayList()
     loadDefault()
   }

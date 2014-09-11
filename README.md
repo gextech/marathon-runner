@@ -1,6 +1,8 @@
 Marathon Runner
 ===============
 
+Master: [![Build Status](https://travis-ci.org/gextech/marathon-runner.png)](https://travis-ci.org/gextech/marathon-runner) 
+
 The marathon runner is a very simple (and opinionated) nashorn runner that aims to be node friendly.
 
 Our main goal is to have a battle tested production environment, while

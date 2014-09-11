@@ -9,18 +9,29 @@ class MarathonRunner {
 
   MarathonRunner(List<String> marathonPath = []) {
     engine = new MarathonCoreEngine()
-    context = new MarathonContext()
-    context.scriptName = '<user>'
     loader = new MarathonModuleLoader(engine, marathonPath)
-    context.loader = loader
+    context = new MarathonContext(loader: loader, scriptName: '<user>')
   }
 
   Object eval(String code) {
     engine.evalGlobal(code, context)
   }
 
+  Object invokeFunction(String function, Object... params) {
+    engine.invokeFunction(context, function, params);
+  }
+
+  Object invokeMethod(String thizName, String methodName, Object... params) {
+    Object thiz = engine.eval(thizName, context)
+    engine.invokeMethod(context, thiz, methodName, params)
+  }
+
   MarathonModuleLoader getLoader() {
     loader
+  }
+
+  MarathonCoreEngine getEngine() {
+    engine
   }
 
   List<String> getMarathonPath() {

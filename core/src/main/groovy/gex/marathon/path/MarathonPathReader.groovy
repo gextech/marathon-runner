@@ -22,11 +22,7 @@ class MarathonPathReader {
   private List addedExtensions = ["", ".js", ".json"]
   private List defaultLoadingPaths = ["node_modules"]
 
-  MarathonPathReader() {
-    this(null)
-  }
-
-  MarathonPathReader(MarathonPathResource parentResource) {
+  MarathonPathReader(MarathonPathResource parentResource = null) {
     globalPaths = new ArrayList<Path>()
     relativePaths = new ArrayList<Path>()
     jars = new HashMap()
@@ -34,6 +30,7 @@ class MarathonPathReader {
     if(parentResource) {
       setupParentResource(parentResource)
     }
+
   }
 
   private void setupParentResource(MarathonPathResource parent) {

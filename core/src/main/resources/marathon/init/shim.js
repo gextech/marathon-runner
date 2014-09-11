@@ -199,15 +199,6 @@ var window = this;
  
 // console-shim
 (function() {
-  // function dump(v) {
-  //   return /number|string|boolean/.test(typeof v) ? v : JSON.stringify(v)
-  // }
-  //
-  // // ugly, but works (?)
-  // function logger() {
-  //     var args = Array.prototype.slice.call(arguments);
-  //     print(args.map(dump).join(' '));
-  // }
   var logger = print;
  
   window.console = { dir: logger, log: logger, warn: logger, info: logger };

@@ -20,6 +20,7 @@ buildscript {
 
 dependencies {
     compile 'org.jboss.aesh:aesh:0.56'
+    compile 'commons-cli:commons-cli:1.2'
     compile( project( ':core' ) )
 }
 

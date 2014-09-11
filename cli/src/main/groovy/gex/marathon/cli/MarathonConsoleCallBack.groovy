@@ -1,5 +1,6 @@
 package gex.marathon.cli
 
+import gex.marathon.core.MarathonContext
 import gex.marathon.core.MarathonRunner
 import org.jboss.aesh.console.ConsoleCallback
 import org.jboss.aesh.console.ConsoleOperation
@@ -13,32 +14,49 @@ class MarathonConsoleCallBack implements ConsoleCallback {
   Console console
   MarathonRunner runner
 
-
-  MarathonConsoleCallBack(Console console){
-    this.runner = new MarathonRunner()
+  MarathonConsoleCallBack(Console console, MarathonRunner runner){
     this.console = console
+    this.runner = runner
   }
 
   @Override
   public int execute(ConsoleOperation output) {
     def input = output.getBuffer()
 
-
-
-    def retValue = runner.eval(input)
-
-    console.getShell().out().println("======> $retValue");
-
-    if (output.getBuffer().equals("quit")) {
-      try {
-        console.stop();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+    if (input.equals("quit")) {
+      quitConsole()
+    }else{
+      evaluateExpression(input)
     }
 
     return 0;
   }
+
+
+  private quitConsole(){
+    try {
+      console.stop();
+    } catch (IOException e) {
+      e.printStackTrace()
+    }
+  }
+
+  private evaluateExpression(String userInput){
+
+    def writer = new PrintWriter(console.getShell().out())
+    def errorWriter = new PrintWriter(console.getShell().err())
+
+    runner.context.setWriter(writer)
+    runner.context.setErrorWriter(errorWriter)
+
+    def retValue = runner.eval(userInput)
+    runner.invokeMethod("console", "log", retValue)
+
+    writer.flush()
+    errorWriter.flush()
+  }
+
+
 
   @Override
   CommandOperation getInput() throws InterruptedException {

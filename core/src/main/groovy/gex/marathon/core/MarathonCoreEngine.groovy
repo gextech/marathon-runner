@@ -84,6 +84,22 @@ class MarathonCoreEngine {
     }
   }
 
+  Object invokeMethod(MarathonContext context, Object thiz, String methodName, Object... params) {
+    Map marathonGlobal = [
+      context: context
+    ]
+    pushStack()
+
+    try {
+      loadLocals(scriptEngine, context)
+      Invocable invocable = (Invocable)scriptEngine
+      invocable.invokeMethod(thiz, methodName, params)
+    } finally {
+      readLocals(scriptEngine, context)
+      popStack()
+    }
+  }
+
   Object evalGlobal(String code, MarathonContext context = new MarathonContext()) {
     Map marathonGlobal = [
       context: context
@@ -94,7 +110,6 @@ class MarathonCoreEngine {
     ScriptContext engineContext = new SimpleScriptContext()
     engineContext = scriptEngine.context
     engineContext.setBindings(commonBindings, ScriptContext.ENGINE_SCOPE)
-    pushStack()
 
     if(context.writer) {
       engineContext.writer = context.writer
@@ -111,10 +126,11 @@ class MarathonCoreEngine {
       scriptEngine.eval(getRequireCode())
 
       retValue = scriptEngine.eval(code)
+
       scriptEngine.getContext().setAttribute("require", null, ScriptContext.ENGINE_SCOPE)
-    } finally {
+    }
+    finally {
       readLocals(scriptEngine, context)
-      popStack()
     }
 
     retValue

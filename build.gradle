@@ -1,6 +1,9 @@
 subprojects {
     apply plugin: 'groovy'
-    version = '0.1.0'
+    apply plugin: 'maven'
+
+    version = '0.1.0-SNAPSHOT'
+    group = 'gex.marathon'
 
     sourceCompatibility = '1.8'
 
@@ -8,6 +11,30 @@ subprojects {
         compile 'org.codehaus.groovy:groovy-all:2.3.6'
         testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
     }   
+
+    def deploymentRepo = version.endsWith("-SNAPSHOT")?"http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/snapshots/":
+        "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
+
+    def username
+    def password
+
+    if(project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')) {
+        username = project['nexusUsername']
+        password = project['nexusPassword']
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: deploymentRepo) {
+                    authentication(userName: username, password: password)
+                }
+                pom.version = project.version
+                pom.artifactId = project.name
+                pom.groupId = project.group
+            }
+        }
+    }
 }
 
 allprojects {

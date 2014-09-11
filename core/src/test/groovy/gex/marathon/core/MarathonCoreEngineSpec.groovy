@@ -1,6 +1,7 @@
 package gex.marathon.core
 
 import gex.marathon.module.MarathonModuleLoader
+import java.nio.file.FileSystems
 import spock.lang.*
 
 class MarathonCoreEngineSpec extends Specification {
@@ -112,6 +113,27 @@ class MarathonCoreEngineSpec extends Specification {
       cubes[2] == 27
       cubes[3] == 64
       cubes[4] == 125
+  }
+
+  def "We can just resolve resources"() {
+    when:
+      def engine = new MarathonCoreEngine()
+      def loader = new MarathonModuleLoader(engine, ['src/test/resources/node_modules'])
+      def context = new MarathonContext(
+        scriptName: 'something.js',
+        loader: loader)
+      def code = """
+      (function () {
+        var test = require.resolve('test');
+        return test;
+      })();
+      """
+      def testResource = engine.eval(code, context)
+      def testPath = FileSystems.getDefault().getPath(testResource)
+
+    then:
+      testPath
+      
   }
 
 }

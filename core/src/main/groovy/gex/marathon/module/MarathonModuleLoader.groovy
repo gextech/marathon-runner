@@ -40,6 +40,7 @@ class MarathonModuleLoader {
   }
 
   MarathonPathResource requireResource(String requirePath) {
+    reader.addExtensions(extensionLoaders.keySet())
     reader.resolvePath(requirePath)
   }
 
@@ -48,7 +49,8 @@ class MarathonModuleLoader {
       return moduleCache.get(requirePath)
     }
 
-    MarathonPathResource resource = reader.resolvePath(requirePath)
+    MarathonPathResource resource = requireResource(requirePath)
+
     if(resource) {
       String filename = resource.path.fileName.toString()
       if(filename.endsWith(".js")) {

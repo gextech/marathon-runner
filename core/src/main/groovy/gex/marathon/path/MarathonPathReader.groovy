@@ -33,6 +33,12 @@ class MarathonPathReader {
 
   }
 
+  public void addExtensions(Set extensions) {
+    Set currentExtensions = addedExtensions.toSet()
+    currentExtensions.addAll(extensions)
+    addedExtensions = currentExtensions.toList()
+  }
+
   private void setupParentResource(MarathonPathResource parent) {
     parentResource = parent
     if(parent.originPath.fileSystem == FileSystems.default) {

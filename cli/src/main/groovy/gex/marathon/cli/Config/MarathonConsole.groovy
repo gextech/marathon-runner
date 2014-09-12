@@ -23,7 +23,7 @@ class MarathonConsole {
 
   def init(Map options){
     this.options = options
-    MarathonRunner runner = new MarathonRunner()
+    MarathonRunner runner = new MarathonRunner(options.marathonPath)
     initMarathonConsole(runner, options.editMode)
   }
 

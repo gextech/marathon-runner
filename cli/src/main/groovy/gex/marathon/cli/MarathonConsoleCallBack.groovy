@@ -50,7 +50,7 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     def input = output.getBuffer().trim()
 
     def commands = [
-      [regex: ":quit|:q", method: quit ],
+      [regex: "quit|exit|:quit|:exit|:Q|:q", method: quit ],
       [regex: ":set prompt (.*)", method: this.&prompt ],
     ]
 

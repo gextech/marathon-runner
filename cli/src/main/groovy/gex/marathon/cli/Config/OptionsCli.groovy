@@ -1,5 +1,6 @@
 package gex.marathon.cli.Config
 
+import org.jboss.aesh.console.settings.Settings
 import org.jboss.aesh.edit.Mode
 
 /**
@@ -24,7 +25,7 @@ class OptionsCli {
         converter:  this.&convertToMode
       ],
       marathonPath : [
-        default: ':)',
+        default: defaultMarathonPath(),
         varArgs: 'mp',
         varConfigFile: 'marathonPath',
         converter: this.&convertToMarathonPath
@@ -39,11 +40,17 @@ class OptionsCli {
         optionValue = getOptionFromConfigFile(v.varConfigFile)
       }
 
-      def finalValue = v.converter(optionValue)
+      def finalValue
 
-      if( finalValue == null){
+      if( optionValue == null){
         finalValue = v.default
+      }else{
+        finalValue = v.converter(optionValue)
+        if( finalValue == null){
+          finalValue = v.default
+        }
       }
+
       [k, finalValue]
     }
 
@@ -55,10 +62,28 @@ class OptionsCli {
     EditingMode.parse(value)
   }
 
-  String convertToMarathonPath(String value){
-    value
+  List<String> defaultMarathonPath(){
+    List<String> paths = []
+
+    def currentDir = System.getProperty("user.dir");
+    paths.add(currentDir)
+    paths.add(new File(currentDir, "node_modules").toPath())
+    paths.addAll( getPathsFromPathVariable( System.getenv().get("MARATHON_PATH") ))
+
+    paths
   }
 
+  List<String> getPathsFromPathVariable(String pathVariable){
+    List<String> paths = []
+    pathVariable?.split(":").each{
+      paths.add(it)
+    }
+    paths
+  }
+
+  List<String> convertToMarathonPath(String value){
+    getPathsFromPathVariable(value)
+  }
 
   boolean isOptionInArgs(String optionName){
     options[optionName] && options[optionName] != null
@@ -71,8 +96,10 @@ class OptionsCli {
   boolean isOptionInConfigFile(String optionName){
     def result = false
     if( configObject ) {
-      result = configObject['settings'][optionName] != null
+      def v = configObject['settings'][optionName]
+      result = (v != null) && (v != [:])
     }
+    println(result)
     result
   }
 

@@ -37,7 +37,7 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     }
   }
 
-  def prompt = { m ->
+  def prompt(def m){
     console.setPrompt( new Prompt("[${m[0][1]}] "))
   }
 
@@ -51,7 +51,7 @@ class MarathonConsoleCallBack implements ConsoleCallback {
 
     def commands = [
       [regex: ":quit|:q", method: quit ],
-      [regex: ":set prompt (.*)", method: prompt ],
+      [regex: ":set prompt (.*)", method: this.&prompt ],
     ]
 
     def f = commands.find{
@@ -60,7 +60,7 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     }
 
     if( f ){
-      f.method.call( input =~ f.regex )
+      f.method( input =~ f.regex )
     }
     else{
       evaluateExpression(input)
@@ -76,8 +76,7 @@ class MarathonConsoleCallBack implements ConsoleCallback {
       runner.invokeMethod("console", "log", retValue)
     }
     catch (Exception e){
-      println(e)
-      println(e.stackTrace)
+      // println(e.stackTrace)
       String error = ">> Ha ocurrido un error, dile a Edu si no sabes como arreglarlo"
       runner.invokeMethod("console", "log", error)
     }

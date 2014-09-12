@@ -79,7 +79,8 @@ class MarathonCoreEngineSpec extends Specification {
         var _ = require('lodash');
         return {
           every: _.every([true, 1, null, 'yes']),
-          filter: _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; })
+          filter: _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; }),
+          cosos: _.map([1, 2, 3], function(n) { return n * 3; })
         };
       })();
       """

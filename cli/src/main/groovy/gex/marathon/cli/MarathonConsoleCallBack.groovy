@@ -4,6 +4,7 @@ import gex.marathon.core.MarathonContext
 import gex.marathon.core.MarathonRunner
 import org.jboss.aesh.console.ConsoleCallback
 import org.jboss.aesh.console.ConsoleOperation
+import org.jboss.aesh.console.Prompt
 import org.jboss.aesh.console.command.CommandOperation
 import org.jboss.aesh.console.Console;
 
@@ -11,29 +12,24 @@ import org.jboss.aesh.console.Console;
  * Created by Tsunllly on 9/10/14.
  */
 class MarathonConsoleCallBack implements ConsoleCallback {
+
   Console console
   MarathonRunner runner
+  PrintWriter writer
+  PrintWriter errorWriter
 
   MarathonConsoleCallBack(Console console, MarathonRunner runner){
     this.console = console
     this.runner = runner
+
+    writer = new PrintWriter(console.getShell().out())
+    errorWriter = new PrintWriter(console.getShell().err())
+
+    runner.context.setWriter(writer)
+    runner.context.setErrorWriter(errorWriter)
   }
 
-  @Override
-  public int execute(ConsoleOperation output) {
-    def input = output.getBuffer()
-
-    if (input.equals("quit")) {
-      quitConsole()
-    }else{
-      evaluateExpression(input)
-    }
-
-    return 0;
-  }
-
-
-  private quitConsole(){
+  def quit  = {
     try {
       console.stop();
     } catch (IOException e) {
@@ -41,19 +37,54 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     }
   }
 
+  def prompt = { m ->
+    console.setPrompt( new Prompt("[${m[0][1]}] "))
+  }
+
+
+
+
+
+  @Override
+  public int execute(ConsoleOperation output) {
+    def input = output.getBuffer().trim()
+
+    def commands = [
+      [regex: ":quit|:q", method: quit ],
+      [regex: ":set prompt (.*)", method: prompt ],
+    ]
+
+    def f = commands.find{
+      def match = input  =~ it.regex
+      match.count > 0
+    }
+
+    if( f ){
+      f.method.call( input =~ f.regex )
+    }
+    else{
+      evaluateExpression(input)
+    }
+    return 0;
+  }
+
+
+
   private evaluateExpression(String userInput){
-
-    def writer = new PrintWriter(console.getShell().out())
-    def errorWriter = new PrintWriter(console.getShell().err())
-
-    runner.context.setWriter(writer)
-    runner.context.setErrorWriter(errorWriter)
-
-    def retValue = runner.eval(userInput)
-    runner.invokeMethod("console", "log", retValue)
-
-    writer.flush()
-    errorWriter.flush()
+    try{
+      def retValue = runner.eval(userInput)
+      runner.invokeMethod("console", "log", retValue)
+    }
+    catch (Exception e){
+      println(e)
+      println(e.stackTrace)
+      String error = ">> Ha ocurrido un error, dile a Edu si no sabes como arreglarlo"
+      runner.invokeMethod("console", "log", error)
+    }
+    finally {
+      writer.flush()
+      errorWriter.flush()
+    }
   }
 
 
@@ -65,6 +96,15 @@ class MarathonConsoleCallBack implements ConsoleCallback {
   @Override
   void setProcess(org.jboss.aesh.console.Process process) {
   }
+
+  void setWriter(PrintWriter writer) {
+    this.writer = writer
+  }
+
+  void setErrorWriter(PrintWriter errorWriter) {
+    this.errorWriter = errorWriter
+  }
+
 
 }
 

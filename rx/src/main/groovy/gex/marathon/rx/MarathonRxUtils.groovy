@@ -11,14 +11,13 @@ class MarathonRxUtils {
     def context = new MarathonContext(loader: runner.loader)
     def converterCode = MarathonUtils.readResource("/marathon/converters/rx.js")
     runner.eval(converterCode, context)
-    context.put("javaObservable", javaObservable)
-    runner.invokeFunction(context, "fromJavaRx")
+    runner.invokeFunction(context, "fromJavaRx", javaObservable)
   }
 
   static Observable toJava(MarathonRunner runner, Object jsObservable) {
     def context = new MarathonContext(loader: runner.loader)
     def converterCode = MarathonUtils.readResource("/marathon/converters/rx.js")
     runner.eval(converterCode, context)
-    runner.invokeMethod(context, "toJavaRx", jsObservable)
+    runner.invokeFunction(context, "toJavaRx", jsObservable)
   }
 }

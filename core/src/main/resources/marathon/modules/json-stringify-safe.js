@@ -41,11 +41,12 @@ console.log = function() {
 
     for(var e in arguments) {
         var stringified = stringify(arguments[e], null, '  ');
-        if(arguments[e] != undefined && stringified == undefined) {
+        if(arguments[e] && stringified == undefined) {
           stringified = arguments[e].toString();
         }
         stringifiedArguments.push(stringified);
     }
+
     print.apply(null, stringifiedArguments);
 }
 

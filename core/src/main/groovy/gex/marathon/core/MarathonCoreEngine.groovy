@@ -209,11 +209,12 @@ class MarathonCoreEngine {
   }
 
   public void readLocals(ScriptEngine engine, MarathonContext context) {
-    def keys = context.locals.keySet()
+    def map = engine.context.getBindings(ScriptContext.ENGINE_SCOPE)
+    def keys = map.keySet()
     keys.each { k ->
       context.put(
         k.toString(),
-        engine.context.getAttribute(k.toString(), ScriptContext.ENGINE_SCOPE))
+        map.get(k.toString()))
     }
   }
 

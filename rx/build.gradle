@@ -1,0 +1,29 @@
+apply plugin: 'watch'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.bluepapa32:gradle-watch-plugin:0.1.3'
+    }
+}   
+
+dependencies {
+    compile( project( ':core' ) )
+    compile 'io.reactivex:rxjava:1.0.0-rc.3'
+}
+
+watch {
+
+    groovy {
+        files files('src/main/groovy', 'src/test/groovy')
+        tasks 'compileGroovy', 'test'
+    }
+
+    resources {
+        files files('src/main/resources', 'src/test/resources')
+        tasks 'processResources', 'test'
+    }
+}
+

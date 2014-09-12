@@ -21,6 +21,15 @@ class MarathonRunner {
     engine.evalGlobal(code, context)
   }
 
+  Object invokeFunction(MarathonContext context, String function, Object... params) {
+    engine.invokeFunction(context, function, params);
+  }
+
+  Object invokeMethod(MarathonContext context, String thizName, String methodName, Object... params) {
+    Object thiz = engine.eval(thizName, context)
+    engine.invokeMethod(context, thiz, methodName, params)
+  }
+
   Object invokeFunction(String function, Object... params) {
     engine.invokeFunction(context, function, params);
   }

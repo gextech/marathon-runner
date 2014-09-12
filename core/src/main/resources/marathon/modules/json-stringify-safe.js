@@ -40,8 +40,13 @@ console.log = function() {
     var stringifiedArguments = [];
 
     for(var e in arguments) {
-        stringifiedArguments.push(stringify(arguments[e]));
+        var stringified = stringify(arguments[e], null, '  ');
+        if(arguments[e] && stringified == undefined) {
+          stringified = arguments[e].toString();
+        }
+        stringifiedArguments.push(stringified);
     }
+
     print.apply(null, stringifiedArguments);
 }
 

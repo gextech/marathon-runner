@@ -43,6 +43,8 @@ var window = this;
       delete timers[num];
     }
   };
+
+  window.clearTimeout = clearInterval;
  
   // XMLHttpRequest
   // Originally implemented by Yehuda Katz

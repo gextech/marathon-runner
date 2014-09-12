@@ -90,6 +90,8 @@ class MarathonConsoleCallBack implements ConsoleCallback {
 
   @Override
   CommandOperation getInput() throws InterruptedException {
+
+
   }
 
   @Override

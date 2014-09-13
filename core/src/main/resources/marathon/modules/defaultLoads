@@ -1,5 +1,8 @@
 json-stringify-safe
+util
 path
+events
+domain
 fs
 module
 vm

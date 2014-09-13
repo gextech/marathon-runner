@@ -35,7 +35,7 @@ var window = this,
     timers[num] = new java.lang.Thread(new java.lang.Runnable({
       run: function(){
         while (true){
-          java.lang.Thread.currentThread().sleep(time);
+          java.lang.Thread.sleep(time);
           fn();
         }
       }

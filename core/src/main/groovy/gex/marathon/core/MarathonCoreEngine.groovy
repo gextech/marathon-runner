@@ -195,7 +195,7 @@ class MarathonCoreEngine {
       loadLocals(scriptEngine, context)
       String formattedCode = prepareCode(code)
       scriptEngine.eval(formattedCode)
-      context.module.moduleMap.exports = engineContext.getAttribute(MARATHON_EXPORTS, ScriptContext.ENGINE_SCOPE)
+      context.module.moduleMap = (Map)engineContext.getAttribute(MARATHON_MODULE, ScriptContext.ENGINE_SCOPE)
     } finally {
       readLocals(scriptEngine, context)
       popStack();

@@ -53,6 +53,10 @@ class OptionsCli {
       [k, finalValue]
     }
 
+    if(options.arguments().size() == 1) {
+      finalOptions.runFile = options.arguments().first()
+    }
+
     finalOptions
   }
 

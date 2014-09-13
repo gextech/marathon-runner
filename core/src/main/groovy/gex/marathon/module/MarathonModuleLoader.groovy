@@ -53,7 +53,7 @@ class MarathonModuleLoader {
       if(npmMain) {
         mainPath = "${requirePath}/${npmMain}" 
       }
-    } else {
+    } else if(packageJson) {
       def slurper = new JsonSlurper()
       def json = (Map)slurper.parseText(packageJson.utf8Contents)
       def npmMain = json.main

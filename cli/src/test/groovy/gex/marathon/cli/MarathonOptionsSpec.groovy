@@ -7,7 +7,7 @@ class MarathonOptionsSpec extends Specification {
 
   def "Test filePath as argument works with other options"() {
     given:
-      String[] arguments = ['file.js', '-h', '-mp', '/marathon/path']
+      String[] arguments = ['-h', '-mp', '/marathon/path', 'file.js', ]
       MarathonOptionsAnalyzer optionsCli = new MarathonOptionsAnalyzer(arguments)
 
     when:

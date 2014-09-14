@@ -38,7 +38,7 @@ class MarathonOptionsAnalyzer {
   Map parseCommandLine(String[] args = arguments){
     def options = cliBuilder.parse(arguments)
     [
-      fileToProcess: getFileToProcess(args),
+      fileToProcess: getFileToProcess(options),
       help : options.h,
       editMode: options.mode,
       marathonPath: options.mp,
@@ -51,10 +51,10 @@ class MarathonOptionsAnalyzer {
   }
 
 
-  String getFileToProcess(String[] args){
+  String getFileToProcess(OptionAccessor options){
     def fileToProcess =  null
-    if(args.size() > 0 &&  args.first() ==~  /(.*)\w+\.\w+/){
-      fileToProcess = args.first()
+    if(options.arguments().size() > 0 &&  options.arguments().first() ==~  /(.*)\w+\.\w+/){
+      fileToProcess = options.arguments().first()
     }
     fileToProcess
   }

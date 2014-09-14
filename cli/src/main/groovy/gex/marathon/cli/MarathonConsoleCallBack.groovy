@@ -41,10 +41,6 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     console.setPrompt( new Prompt("[${m[0][1]}] "))
   }
 
-
-
-
-
   @Override
   public int execute(ConsoleOperation output) {
     def input = output.getBuffer().trim()
@@ -76,8 +72,7 @@ class MarathonConsoleCallBack implements ConsoleCallback {
       runner.invokeMethod("console", "log", retValue)
     }
     catch (Exception e){
-      // println(e.stackTrace)
-      String error = ">> Ha ocurrido un error, dile a Edu si no sabes como arreglarlo"
+      println(e.stackTrace)
       runner.invokeMethod("console", "log", error)
     }
     finally {
@@ -86,12 +81,8 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     }
   }
 
-
-
   @Override
   CommandOperation getInput() throws InterruptedException {
-
-
   }
 
   @Override

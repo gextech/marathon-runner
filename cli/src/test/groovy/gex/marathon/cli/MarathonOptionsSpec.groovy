@@ -1,6 +1,5 @@
 package gex.marathon.cli
 
-import gex.marathon.cli.config.InitialModuleOptions
 import gex.marathon.cli.config.MarathonOptionsAnalyzer
 import spock.lang.*
 

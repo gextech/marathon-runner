@@ -1,6 +1,7 @@
 package gex.marathon.cli.config
 
 import gex.marathon.core.MarathonUtils
+import org.apache.commons.cli.GnuParser
 import org.apache.commons.cli.Option
 import org.jboss.aesh.edit.Mode
 
@@ -22,15 +23,15 @@ class MarathonOptionsAnalyzer {
 
   MarathonOptionsAnalyzer( String[] arguments){
 
-    cliBuilder = new CliBuilder(usage: 'marathon', stopAtNonOption: false, width: 120)
+    cliBuilder = new CliBuilder(usage: 'marathon [options] [targetFile]', header: 'Options:', stopAtNonOption: false, width: 120)
     // Create the list of options.
     cliBuilder.with {
-      h  longOpt: 'help', 'show usage information'
-      mp longOpt: 'marathon-path', args:1, argName:'path', 'specifies path were modules exist'
+      h  longOpt: 'help', 'Show usage information'
+      mp longOpt: 'marathon-path', args:1, argName:'path', 'Specifies marathon path used to require modules'
       mode longOpt: 'editing-mode', args:1, argName:'mode', 'Edition mode [vi|emacs]'
-      config longOpt: 'config-file', args:1, argName:'configFile', 'config file to use. If not specified uses ~/.marathon'
-      imp longOpt: 'init-modules-path', args:1, argName:'initModulesPath', 'path taken for --init modules if path is not specified explicitly'
-      im longOpt: 'init-modules', args: Option.UNLIMITED_VALUES, valueSeparator: ',' as char, 'list of initial modules to load [$name:$path]|[$name], separated by (,) colon. Example: -im fs:/path/fs,vm:/path/vm,domain. If $path is not specified then --init-modules-path is taken, if not specified then it uses the path corresponding to project resources. Other valid values are [NONE|DEFAULT]'
+      config longOpt: 'config-file', args:1, argName:'configFile', 'Config file to use. If not specified uses ~/.marathon'
+      imp longOpt: 'init-modules-path', args:1, argName:'initModulesPath', 'Path taken for --init modules if path is not specified explicitly'
+      im longOpt: 'init-modules', argName: 'modules', args: Option.UNLIMITED_VALUES, valueSeparator: ',' as char, 'List of initial modules to load separated by (,) commas. Example: -im $name:$path,fs:/path/fs,vm:/path/vm,domain. If $path is not specified then --init-modules-path is taken, if not specified then it uses the path corresponding to project resources. Other valid values are [NONE|DEFAULT]'
   }
     cliBuilder
 

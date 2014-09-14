@@ -8,6 +8,7 @@ import spock.util.concurrent.PollingConditions
 
 class MarathonRxUtilsSpec extends Specification {
 
+  @Ignore
   def "We can convert a java observable into js"() {
     when:
       Observable oneObservable = Observable.just(42)
@@ -38,6 +39,7 @@ class MarathonRxUtilsSpec extends Specification {
       }
   }
 
+  @Ignore
   def "We can convert a js observable into java"() {
     when:
       def conditions = new PollingConditions(timeout: 5)

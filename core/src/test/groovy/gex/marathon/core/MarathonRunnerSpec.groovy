@@ -35,6 +35,37 @@ class MarathonRunnerSpec extends Specification {
       a[2] == 9
   }
 
+  def "Test default modules are correctly loaded"() {
+    when:
+      def runner = new MarathonRunner(["src/test/resources/node_modules"])
+      runner.eval("""
+      var fs = require('fs');
+      """)
+    then:
+      runner.get('fs') != null
+  }
+
+  def "Test when default modules are disabled (empty array)"() {
+    when:
+      def runner = new MarathonRunner(["src/test/resources/node_modules"], [])
+      runner.eval("""
+      var fs = require('fs');
+      """)
+    then:
+      IllegalArgumentException e = thrown()
+      e.message == 'Module fs cannot be loaded'
+  }
+
+  def "Test when default modules are custom located and loaded"() {
+    when:
+      def runner = new MarathonRunner(["src/test/resources/node_modules"],
+        [[name:'fs', path:'src/test/resources/other_path/modules']])
+      runner.eval("""
+      var fs = require('fs');
+      """)
+    then:
+      runner.get('fs') != null
+  }
 
   def "We can follow up various steps, testing cli mode"(){
     given:

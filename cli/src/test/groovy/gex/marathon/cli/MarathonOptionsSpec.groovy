@@ -19,5 +19,21 @@ class MarathonOptionsSpec extends Specification {
       map.fileToProcess == 'file.js'
       map.configFile == null
   }
+
+
+  def "Test command line with a list with multiple defaults "() {
+    given:
+      String[] arguments = ['-d', 'fs:/path/to/fs;domain:/path/to/domain;vm', '-config', '/config/file' ]
+      MarathonOptionsAnalyzer optionsCli = new MarathonOptionsAnalyzer(arguments)
+
+    when:
+      def map = optionsCli.parseCommandLine(arguments)
+
+    then:
+      map.defaults.size() == 3
+      map.defaults == ['fs:/path/to/fs', 'domain:/path/to/domain', 'vm']
+      map.configFile == '/config/file'
+  }
+
   
 }

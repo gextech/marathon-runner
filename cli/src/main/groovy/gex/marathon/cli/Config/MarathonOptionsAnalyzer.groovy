@@ -1,6 +1,7 @@
 package gex.marathon.cli.config
 
 import gex.marathon.core.MarathonUtils
+import org.apache.commons.cli.Option
 import org.jboss.aesh.edit.Mode
 
 /**
@@ -28,6 +29,7 @@ class MarathonOptionsAnalyzer {
       mp longOpt: 'marathon-path', args:1, argName:'path', 'specifies path were modules exist'
       mode longOpt: 'editing-mode', args:1, argName:'mode', 'Edition mode [vi|emacs]'
       config longOpt: 'config-file', args:1, argName:'configFile', 'config file to use. If not specified uses ~/.marathon'
+      d longOpt: 'defaults', args: Option.UNLIMITED_VALUES, valueSeparator: ';' as char, 'default list...'
     }
     cliBuilder
 
@@ -42,7 +44,8 @@ class MarathonOptionsAnalyzer {
       help : options.h,
       editMode: options.mode,
       marathonPath: options.mp,
-      configFile: getOptionValue(options.config)
+      configFile: getOptionValue(options.config),
+      defaults: options.ds
     ]
   }
 
@@ -94,6 +97,12 @@ class MarathonOptionsAnalyzer {
         default: defaultMarathonPath(),
         varArgs: 'marathonPath',
         varConfigFile: 'marathonPath',
+        converter: this.&convertToMarathonPath
+      ],
+      loadDefaults: [
+        default: null,   // No additional actions are required
+        varArgs: 'defaults',
+        varConfigFile: 'loadDefaults',
         converter: this.&convertToMarathonPath
       ]
     ]

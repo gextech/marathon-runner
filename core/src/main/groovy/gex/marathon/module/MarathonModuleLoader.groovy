@@ -20,7 +20,7 @@ class MarathonModuleLoader {
 
   Map<String, Object> extensionLoaders
 
-  MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false) {
+  MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false, List<Map> defaultModules = null) {
     this.engine = engine
     extensionLoaders = new HashMap()
     moduleCache = new HashMap()
@@ -29,9 +29,18 @@ class MarathonModuleLoader {
       reader.addPath(it)
     }
     if(!coreModule) {
-      loadDefaultModules()
+      loadCorrectDefaultModules(defaultModules)
     }
   }
+
+  private void loadCorrectDefaultModules(List<Map> defaultModules){
+    if(defaultModules == null){
+      loadDefaultModules()
+    }else{
+      loadDefaultModules(defaultModules)
+    }
+  }
+
 
   private void loadDefaultModules() {
     List<String> defaultModules = Arrays.asList(MarathonUtils.readResource("/marathon/modules/defaultLoads").split("\n"))
@@ -41,6 +50,22 @@ class MarathonModuleLoader {
       moduleCache.put(it, result)
     }
   }
+
+  private void loadDefaultModules(List<Map> modules){
+    modules.each { module ->
+      String moduleName = module.name
+      String modulePath = module.path
+
+      def file = new File(modulePath, "${module.name}.js")
+
+      if(file.exists()){
+        def code = file.getText()
+        def result = compileJs(moduleName, code, true)
+        moduleCache.put(moduleName, result)
+      }
+    }
+  }
+
 
   private MarathonPathResource requireMainResource(
     String requirePath,

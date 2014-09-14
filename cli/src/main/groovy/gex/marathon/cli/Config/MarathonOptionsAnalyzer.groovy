@@ -22,15 +22,16 @@ class MarathonOptionsAnalyzer {
 
   MarathonOptionsAnalyzer( String[] arguments){
 
-    cliBuilder = new CliBuilder(usage: 'marathon', stopAtNonOption: false)
+    cliBuilder = new CliBuilder(usage: 'marathon', stopAtNonOption: false, width: 120)
     // Create the list of options.
     cliBuilder.with {
       h  longOpt: 'help', 'show usage information'
       mp longOpt: 'marathon-path', args:1, argName:'path', 'specifies path were modules exist'
       mode longOpt: 'editing-mode', args:1, argName:'mode', 'Edition mode [vi|emacs]'
       config longOpt: 'config-file', args:1, argName:'configFile', 'config file to use. If not specified uses ~/.marathon'
-      d longOpt: 'defaults', args: Option.UNLIMITED_VALUES, valueSeparator: ';' as char, 'default list...'
-    }
+      imp longOpt: 'init-modules-path', args:1, argName:'initModulesPath', 'path taken for --init modules if path is not specified explicitly'
+      im longOpt: 'init-modules', args: Option.UNLIMITED_VALUES, valueSeparator: ',' as char, 'list of initial modules to load [$name:$path]|[$name], separated by (,) colon. Example: -im fs:/path/fs,vm:/path/vm,domain. If $path is not specified then --init-modules-path is taken, if not specified then it uses the path corresponding to project resources. Other valid values are [NONE|DEFAULT]'
+  }
     cliBuilder
 
     this.arguments = arguments
@@ -45,7 +46,8 @@ class MarathonOptionsAnalyzer {
       editMode: options.mode,
       marathonPath: options.mp,
       configFile: getOptionValue(options.config),
-      defaults: options.ds
+      initModules: (options.ims != false) ? options.ims : null,
+      initModulesPath: getOptionValue(options.imp)
     ]
   }
 
@@ -61,7 +63,6 @@ class MarathonOptionsAnalyzer {
     }
     fileToProcess
   }
-
 
   ConfigObject parseFromConfigFile(String configFilePath){
     def result
@@ -99,11 +100,19 @@ class MarathonOptionsAnalyzer {
         varConfigFile: 'marathonPath',
         converter: this.&convertToMarathonPath
       ],
-      loadDefaults: [
+      initModules: [
         default: null,   // No additional actions are required
-        varArgs: 'defaults',
-        varConfigFile: 'loadDefaults',
-        converter: this.&convertToMarathonPath
+        varArgs: 'initModules',
+        varConfigFile: 'initModules',
+        converter: this.&convertToInitModules,
+        canBeNull: true
+      ],
+      initModulesPath: [
+        default: null,
+        varArgs: 'initModulesPath',
+        varConfigFile: 'initModulesPath',
+        converter: this.&convertToInitModulesPath,
+        canBeNull: true
       ]
     ]
   }
@@ -111,39 +120,84 @@ class MarathonOptionsAnalyzer {
   Map parseFromMergingLineAndConfigFile( Map lineOptions, ConfigObject configFileOptions ){
     def optionsMap = getMarathonOptionsMap()
 
-    optionsMap.collectEntries { k, v ->
-      String optionValue
+    def result = optionsMap.collectEntries { k, v ->
+      def optionValue
 
       if (isOptionInCommandLine(lineOptions, v.varArgs)) {
         optionValue = getOptionFromCommandLine(lineOptions, v.varArgs)
-      } else if (isOptionInConfigFile(configFileOptions, v.varConfigFile)) {
+      }
+      else if (isOptionInConfigFile(configFileOptions, v.varConfigFile)) {
         optionValue = getOptionFromConfigFile(configFileOptions, v.varConfigFile)
       }
 
       def finalValue
-
       if (optionValue == null) {
         finalValue = v.default
       } else {
-        finalValue = v.converter(optionValue)
-        if (finalValue == null) {
+        finalValue =  v.converter(optionValue)
+        if ( !v.canBeNull && finalValue == null) {
           finalValue = v.default
         }
       }
       [k, finalValue]
     }
+    mergeBetweenOptions(result)
   }
+
+  static Map mergeBetweenOptions( Map options ){
+    if(options.initModules == null)
+      return options
+
+    String iniModulesPath = options.initModulesPath
+    def finalInitModules = options.initModules.each{ module ->
+      if(module.path == null){
+        module.path = iniModulesPath
+      }
+    }
+    options.initModules = finalInitModules
+    options
+  }
+
 
   List<String> convertToMarathonPath(String value){
     getPathsFromPathVariable(value)
   }
 
-  boolean isOptionInCommandLine(Map options, String optionName){
-    options[optionName] && options[optionName] != null
+  static List<Map> convertToInitModules(List initModules){
+
+    if(initModules.size() == 1){
+      if( initModules.first() == 'NONE' ){
+        return []
+      }else
+      if( initModules.first() == 'DEFAULT' ){
+        return null
+      }
+    }
+
+    List<Map> result = []
+
+    initModules.each { m ->
+      def tokens = m.split(':')
+      result << [
+        name: tokens.first(),
+        path: (tokens.size() == 2) ? tokens[1] : null
+      ]
+    }
+   result
   }
 
-  String getOptionFromCommandLine(Map options, String optionName){
-    options[optionName]
+  String convertToInitModulesPath(String initModulesPath){
+    initModulesPath
+  }
+
+  boolean isOptionInCommandLine(Map options, String optionName){
+    def result = options[optionName] && options[optionName] != null
+    result
+  }
+
+  def getOptionFromCommandLine(Map options, String optionName){
+    def result = options[optionName]
+    result
   }
 
   boolean isOptionInConfigFile(ConfigObject configObject, String optionName){

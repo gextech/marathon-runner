@@ -92,7 +92,6 @@ class MarathonCoreEngineSpec extends Specification {
       val['filter'][2] == 6
   }
 
- @Ignore
   def "We can load and then use things, even in coffeescript"() {
     when:
       def engine = new MarathonCoreEngine()

@@ -20,7 +20,10 @@ class MarathonModuleLoader {
 
   Map<String, Object> extensionLoaders
 
-  MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false) {
+  private final static String DEFAULT_MODULES_PATH = '/marathon/modules'
+
+
+  MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false, List<Map> initialModules = null) {
     this.engine = engine
     extensionLoaders = new HashMap()
     moduleCache = new HashMap()
@@ -29,17 +32,49 @@ class MarathonModuleLoader {
       reader.addPath(it)
     }
     if(!coreModule) {
-      loadDefaultModules()
+      loadInitialModules(initialModules)
     }
   }
+
+  private void loadInitialModules(List<Map> initialModules){
+    if(initialModules == null){
+      loadDefaultModules()
+    }else{
+      loadCustomInitialModules(initialModules)
+    }
+  }
+
 
   private void loadDefaultModules() {
     List<String> defaultModules = Arrays.asList(MarathonUtils.readResource("/marathon/modules/defaultLoads").split("\n"))
     defaultModules.each {
-      def code = MarathonUtils.readResource("/marathon/modules/${it}.js")
-      def result = compileJs(it, code, true)
-      moduleCache.put(it, result)
+      loadInitModuleFromResources(it)
     }
+  }
+
+  private void loadCustomInitialModules(List<Map> modules){
+    modules.each { module ->
+      String moduleName = module.name
+
+      if(module.path){
+        String modulePath = module.path
+        def file = new File(modulePath, "${moduleName}.js")
+
+        if(file.exists()) {
+          String code = file.getText()
+          MarathonModule result = compileJs(moduleName, code, true)
+          moduleCache.put(moduleName, result)
+        }
+      }else{
+        loadInitModuleFromResources(moduleName)
+      }
+    }
+  }
+
+  private void loadInitModuleFromResources(String moduleName){
+    def code = MarathonUtils.readResource("${DEFAULT_MODULES_PATH}/${moduleName}.js")
+    def result = compileJs(moduleName, code, true)
+    moduleCache.put(moduleName, result)
   }
 
   private MarathonPathResource requireMainResource(

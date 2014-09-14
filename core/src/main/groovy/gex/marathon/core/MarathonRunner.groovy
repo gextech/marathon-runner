@@ -7,9 +7,9 @@ class MarathonRunner {
   private MarathonModuleLoader loader
   MarathonContext context
 
-  MarathonRunner(List<String> marathonPath = []) {
+  MarathonRunner(List<String> marathonPath = [], List<Map> initialModules = null) {
     engine = new MarathonCoreEngine()
-    loader = new MarathonModuleLoader(engine, marathonPath)
+    loader = new MarathonModuleLoader(engine, marathonPath, null, false, initialModules)
     context = new MarathonContext(loader: loader, scriptName: '<user>')
   }
 

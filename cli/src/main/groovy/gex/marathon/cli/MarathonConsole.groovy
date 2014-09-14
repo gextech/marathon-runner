@@ -1,12 +1,10 @@
 package gex.marathon.cli
 
-import gex.marathon.cli.MarathonConsoleCallBack
 import gex.marathon.core.MarathonRunner
 import gex.marathon.core.MarathonUtils
 import org.jboss.aesh.console.Prompt
 import org.jboss.aesh.console.Console
 import org.jboss.aesh.console.settings.SettingsBuilder
-import org.jboss.aesh.edit.Mode
 
 /**
  * Created by Tsunllly on 9/11/14.
@@ -23,7 +21,7 @@ class MarathonConsole {
   MarathonConsole( Map options ){
     prompt = new Prompt("[marathon>  ] ")
     this.options = options
-    runner = new MarathonRunner(options.marathonPath)
+    runner = new MarathonRunner(options.marathonPath, options.initModules)
   }
 
   public init(){

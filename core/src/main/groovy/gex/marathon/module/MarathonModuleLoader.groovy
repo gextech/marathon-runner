@@ -20,7 +20,7 @@ class MarathonModuleLoader {
 
   Map<String, Object> extensionLoaders
 
-  MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false, List<Map> defaultModules = null) {
+  MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false, List<Map> initialModules = null) {
     this.engine = engine
     extensionLoaders = new HashMap()
     moduleCache = new HashMap()
@@ -29,15 +29,15 @@ class MarathonModuleLoader {
       reader.addPath(it)
     }
     if(!coreModule) {
-      loadCorrectDefaultModules(defaultModules)
+      loadInitialModules(initialModules)
     }
   }
 
-  private void loadCorrectDefaultModules(List<Map> defaultModules){
-    if(defaultModules == null){
+  private void loadInitialModules(List<Map> initialModules){
+    if(initialModules == null){
       loadDefaultModules()
     }else{
-      loadDefaultModules(defaultModules)
+      loadDefaultModules(initialModules)
     }
   }
 

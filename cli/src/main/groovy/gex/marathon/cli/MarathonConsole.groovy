@@ -33,7 +33,6 @@ class MarathonConsole {
 
     console = new Console(settingsBuilder.create());
 
-    console.getShell().out().println(options)
     console.getShell().out().println(getBanner())
 
     console.setPrompt(prompt);

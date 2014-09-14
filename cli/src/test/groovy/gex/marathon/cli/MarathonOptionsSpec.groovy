@@ -1,6 +1,6 @@
 package gex.marathon.cli
 
-import gex.marathon.cli.Config.MarathonOptionsAnalyzer
+import gex.marathon.cli.config.MarathonOptionsAnalyzer
 import spock.lang.*
 
 class MarathonOptionsSpec extends Specification {

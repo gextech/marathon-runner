@@ -2,7 +2,7 @@
 var Rx;
 
 try {
-  Rx = require('rx/dist/rx.all');
+  Rx = require('rx');
 } catch(e) {
   throw Error('Cannot load module rx, check it is in marathon path ' + e.message)
 }

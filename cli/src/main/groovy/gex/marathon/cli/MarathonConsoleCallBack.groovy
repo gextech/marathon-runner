@@ -55,10 +55,9 @@ class MarathonConsoleCallBack implements ConsoleCallback {
       match.count > 0
     }
 
-    if( f ){
+    if( f ) {
       f.method( input =~ f.regex )
-    }
-    else{
+    } else {
       evaluateExpression(input)
     }
     return 0;
@@ -67,12 +66,12 @@ class MarathonConsoleCallBack implements ConsoleCallback {
 
 
   private evaluateExpression(String userInput){
-    try{
+    try {
       def retValue = runner.eval(userInput)
       runner.invokeMethod("console", "log", retValue)
     }
     catch (Exception e){
-      println(e.stackTrace)
+      e.printStackTrace(errorWriter)
       runner.invokeMethod("console", "log", error)
     }
     finally {

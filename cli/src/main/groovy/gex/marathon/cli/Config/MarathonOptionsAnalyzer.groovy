@@ -1,4 +1,4 @@
-package gex.marathon.cli.Config
+package gex.marathon.cli.config
 
 import gex.marathon.core.MarathonUtils
 import org.jboss.aesh.edit.Mode

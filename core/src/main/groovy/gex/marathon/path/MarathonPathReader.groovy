@@ -90,13 +90,9 @@ class MarathonPathReader {
     if(path.startsWith("./") && parentResource) {
       def fs = parentResource.originPath.fileSystem
       Path rootPath
-      if(fs != FileSystems.getDefault()) {
-        rootPath = fs.getPath(fs.separator)
-      } else {
-        rootPath = parentResource.path
-        if(rootPath.toFile().isFile()) {
-          rootPath = rootPath.parent
-        }
+      rootPath = parentResource.path
+      if(Files.isRegularFile(rootPath)) {
+        rootPath = rootPath.parent
       }
       result = resolvePathInPaths(path, [rootPath])
     } else {

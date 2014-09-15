@@ -3,6 +3,7 @@ package gex.marathon.cli
 import gex.marathon.cli.Config.MarathonConsole
 import gex.marathon.cli.Config.OptionsCli
 import gex.marathon.core.MarathonUtils
+import gex.marathon.core.MarathonRunner
 
 public class MarathonCli {
 
@@ -31,7 +32,19 @@ public class MarathonCli {
 
     Map finalOptions = optionsCli.parseOptions()
 
-    marathonConsole.init(finalOptions)
+    if(finalOptions.runFile) {
+      runFile(finalOptions)
+    } else {
+      // Go to interactive mode
+      marathonConsole.init(finalOptions)
+    }
+  }
+
+  static def runFile(Map finalOptions) {
+    MarathonRunner runner = new MarathonRunner(finalOptions.marathonPath)
+    File file = new File(finalOptions.runFile)
+    String code = file.getText()
+    runner.eval(code)
   }
 
 

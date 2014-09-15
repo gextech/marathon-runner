@@ -2,11 +2,20 @@
 // timers, xhr
  
 // The window Object
-var window = this;
- 
+var window = this,
+    global = this;
 (function(){
  
   var curLocation = (new java.io.File("./")).toURL();
+
+  //Process
+  window.process = {
+    title: 'marathon',
+    version: '0.1.0-SNAPSHOT',
+    domain: null,
+    _setupDomainUse : function (domain, domainFlag) {
+    }
+  };
  
   // Timers
  
@@ -26,7 +35,7 @@ var window = this;
     timers[num] = new java.lang.Thread(new java.lang.Runnable({
       run: function(){
         while (true){
-          java.lang.Thread.currentThread().sleep(time);
+          java.lang.Thread.sleep(time);
           fn();
         }
       }

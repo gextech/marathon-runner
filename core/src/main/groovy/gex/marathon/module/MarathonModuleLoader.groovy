@@ -53,7 +53,7 @@ class MarathonModuleLoader {
       if(npmMain) {
         mainPath = "${requirePath}/${npmMain}" 
       }
-    } else {
+    } else if(packageJson) {
       def slurper = new JsonSlurper()
       def json = (Map)slurper.parseText(packageJson.utf8Contents)
       def npmMain = json.main
@@ -136,7 +136,11 @@ class MarathonModuleLoader {
   public MarathonModule compileJs(String filename, String code, boolean coreModule = false) {
     MarathonContext context = new MarathonContext()
     context.scriptName = filename
-    context.loader = new MarathonModuleLoader(engine, reader.globalPaths, resource, coreModule)
+    if(coreModule) {
+      context.loader = this
+    } else {
+      context.loader = new MarathonModuleLoader(engine, reader.globalPaths, resource, coreModule)
+    }
     context.loader.extensionLoaders = extensionLoaders
     context.module = new MarathonModule(context.scriptName)
     engine.evalModule(code, context)

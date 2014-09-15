@@ -1,6 +1,5 @@
 package gex.marathon.cli.Config
 
-import org.jboss.aesh.console.settings.Settings
 import org.jboss.aesh.edit.Mode
 
 /**
@@ -54,6 +53,10 @@ class OptionsCli {
       [k, finalValue]
     }
 
+    if(options.arguments().size() == 1) {
+      finalOptions.runFile = options.arguments().first()
+    }
+
     finalOptions
   }
 
@@ -99,7 +102,6 @@ class OptionsCli {
       def v = configObject['settings'][optionName]
       result = (v != null) && (v != [:])
     }
-    println(result)
     result
   }
 

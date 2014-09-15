@@ -90,13 +90,9 @@ class MarathonPathReader {
     if(path.startsWith("./") && parentResource) {
       def fs = parentResource.originPath.fileSystem
       Path rootPath
-      if(fs != FileSystems.getDefault()) {
-        rootPath = fs.getPath(fs.separator)
-      } else {
-        rootPath = parentResource.path
-        if(rootPath.toFile().isFile()) {
-          rootPath = rootPath.parent
-        }
+      rootPath = parentResource.path
+      if(Files.isRegularFile(rootPath)) {
+        rootPath = rootPath.parent
       }
       result = resolvePathInPaths(path, [rootPath])
     } else {
@@ -116,8 +112,10 @@ class MarathonPathReader {
       Map attrs = (Map)jars.get(p.fileSystem)
       if(attrs) {
         if(attrs.get(PACKAGE_NAME)) {
-          def name = attrs.get(PACKAGE_NAME).toString() + File.separator
-          if(path.startsWith(name)) {
+          def name = attrs.get(PACKAGE_NAME).toString()
+          if(path.startsWith(name + File.separator)) {
+            lookupPath = path.replace(name + File.separator, "")
+          } else if(path == name) {
             lookupPath = path.replace(name, "")
           }
         }

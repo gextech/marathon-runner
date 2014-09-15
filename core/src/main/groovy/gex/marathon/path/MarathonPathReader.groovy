@@ -116,8 +116,10 @@ class MarathonPathReader {
       Map attrs = (Map)jars.get(p.fileSystem)
       if(attrs) {
         if(attrs.get(PACKAGE_NAME)) {
-          def name = attrs.get(PACKAGE_NAME).toString() + File.separator
-          if(path.startsWith(name)) {
+          def name = attrs.get(PACKAGE_NAME).toString()
+          if(path.startsWith(name + File.separator)) {
+            lookupPath = path.replace(name + File.separator, "")
+          } else if(path == name) {
             lookupPath = path.replace(name, "")
           }
         }

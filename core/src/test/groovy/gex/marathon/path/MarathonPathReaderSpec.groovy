@@ -33,7 +33,7 @@ class MarathonPathReaderSpec extends Specification {
       def marathonPath = new MarathonPathReader()
     when:
       marathonPath.addPath("src/test/resources/lodash.jar")
-      def lodash = marathonPath.resolvePath("lodash/lodash")
+      def lodash = marathonPath.resolvePath("lodash")
     then:
       lodash != null
   }

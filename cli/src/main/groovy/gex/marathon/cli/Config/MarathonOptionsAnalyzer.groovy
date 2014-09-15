@@ -32,7 +32,8 @@ class MarathonOptionsAnalyzer {
       config longOpt: 'config-file', args:1, argName:'configFile', 'Config file to use. If not specified uses ~/.marathon'
       imp longOpt: 'init-modules-path', args:1, argName:'initModulesPath', 'Path taken for --init modules if path is not specified explicitly'
       im longOpt: 'init-modules', argName: 'modules', args: Option.UNLIMITED_VALUES, valueSeparator: ',' as char, 'List of initial modules to load separated by (,) commas. Example: -im $name:$path,fs:/path/fs,vm:/path/vm,domain. If $path is not specified then --init-modules-path is taken, if not specified then it uses the path corresponding to project resources. Other valid values are [NONE|DEFAULT]'
-  }
+      r longOpt: 'reload-context', argName: 'reloadContext', 'If present, each evaluation is made with a different context'
+    }
     cliBuilder
 
     this.arguments = arguments
@@ -48,7 +49,8 @@ class MarathonOptionsAnalyzer {
       marathonPath: options.mp,
       configFile: getOptionValue(options.config),
       initModules: (options.ims != false) ? options.ims : null,
-      initModulesPath: getOptionValue(options.imp)
+      initModulesPath: getOptionValue(options.imp),
+      reloadContext: options.r
     ]
   }
 
@@ -112,7 +114,7 @@ class MarathonOptionsAnalyzer {
         default: null,
         varArgs: 'initModulesPath',
         varConfigFile: 'initModulesPath',
-        converter: this.&convertToInitModulesPath,
+        converter: this.&noConvert,
         canBeNull: true
       ]
     ]
@@ -187,8 +189,8 @@ class MarathonOptionsAnalyzer {
    result
   }
 
-  String convertToInitModulesPath(String initModulesPath){
-    initModulesPath
+  def noConvert(Object object){
+    object
   }
 
   boolean isOptionInCommandLine(Map options, String optionName){

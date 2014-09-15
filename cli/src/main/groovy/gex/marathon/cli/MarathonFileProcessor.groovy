@@ -16,7 +16,7 @@ class MarathonFileProcessor {
 
   MarathonFileProcessor(Map options){
     this.options = options
-    this.runner = new MarathonRunner(options.marathonPath, options.initModules)
+    this.runner = new MarathonRunner(options)
   }
 
 

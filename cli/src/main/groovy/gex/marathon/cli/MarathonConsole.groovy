@@ -17,11 +17,13 @@ class MarathonConsole {
   Console console
   Prompt prompt
 
+  Boolean reloadContext
 
-  MarathonConsole( Map options ){
+  MarathonConsole( Map options, Boolean reloadContext = false){
     prompt = new Prompt("[marathon>  ] ")
     this.options = options
-    runner = new MarathonRunner(options.marathonPath, options.initModules)
+    runner = new MarathonRunner(options)
+    this.reloadContext = reloadContext
   }
 
   public init(){
@@ -35,7 +37,7 @@ class MarathonConsole {
 
     console.setPrompt(prompt);
 
-    console.setConsoleCallback( new MarathonConsoleCallBack(console, runner) );
+    console.setConsoleCallback( new MarathonConsoleCallBack(console, runner, reloadContext) );
     console.start();
   }
 

@@ -3,7 +3,7 @@ package gex.marathon.cli
 import gex.marathon.cli.config.MarathonOptionsAnalyzer
 import spock.lang.*
 
-class MarathonOptionsSpec extends Specification {
+class MarathonOptionsAnslyzerSpec extends Specification {
 
   def "Test filePath as argument works with other options"() {
     given:

@@ -35,6 +35,21 @@ class MarathonRunnerSpec extends Specification {
       a[2] == 9
   }
 
+  def "Testing marathon runner with options map constructor"() {
+    when:
+      def runner = new MarathonRunner([marathonPath: ["src/test/resources/node_modules"] ])
+      runner.eval("""
+      var _ = require('lodash/lodash'),
+          a = _.map([1, 2, 3], function(n) { return n * 3; });
+      """)
+      def a = runner.get("a")
+
+    then:
+      a[0] == 3
+      a[1] == 6
+      a[2] == 9
+  }
+
   def "Test default modules are correctly loaded"() {
     when:
       def runner = new MarathonRunner(["src/test/resources/node_modules"])
@@ -81,6 +96,9 @@ class MarathonRunnerSpec extends Specification {
     then:
       x == 10
   }
+
+
+
 
 
 

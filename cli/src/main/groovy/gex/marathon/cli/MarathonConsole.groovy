@@ -1,37 +1,33 @@
-package gex.marathon.cli.Config
+package gex.marathon.cli
 
-import gex.marathon.cli.MarathonConsoleCallBack
 import gex.marathon.core.MarathonRunner
 import gex.marathon.core.MarathonUtils
 import org.jboss.aesh.console.Prompt
 import org.jboss.aesh.console.Console
 import org.jboss.aesh.console.settings.SettingsBuilder
-import org.jboss.aesh.edit.Mode
 
 /**
  * Created by Tsunllly on 9/11/14.
  */
 class MarathonConsole {
-  Console console
+
+  MarathonRunner runner
   Map options
+
+  Console console
   Prompt prompt
 
 
-  MarathonConsole( ){
+  MarathonConsole( Map options ){
     prompt = new Prompt("[marathon>  ] ")
-  }
-
-  def init(Map options){
     this.options = options
-    MarathonRunner runner = new MarathonRunner(options.marathonPath)
-    initMarathonConsole(runner, options.editMode)
+    runner = new MarathonRunner(options.marathonPath, options.initModules)
   }
 
-
-  public initMarathonConsole(MarathonRunner runner, Mode editMode){
+  public init(){
     SettingsBuilder settingsBuilder = new SettingsBuilder()
     settingsBuilder.parseOperators(false)
-    settingsBuilder.mode(editMode)
+    settingsBuilder.mode(options.mode)
 
     console = new Console(settingsBuilder.create());
 

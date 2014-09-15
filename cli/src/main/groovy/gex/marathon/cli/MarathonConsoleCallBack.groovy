@@ -52,11 +52,11 @@ class MarathonConsoleCallBack implements ConsoleCallback {
 
     def commands = [
       [name: 'quit', regex: "quit|exit|:quit|:exit|:q", method: this.&quit ],
-      [name: 'prompt', regex: ":set prompt (.*)", method: this.&prompt ],
-      [name: 'reload', regex: ":set reload (true|false)", method: this.&reload ],
-      [name: 'getReload', regex: ":get reload", method: this.&getReload ],
+      [name: 'prompt', regex: ":prompt (.*)", method: this.&prompt ],
+      [name: 'reload', regex: ":reload (true|false)", method: this.&reload ],
+      [name: 'getReload', regex: ":reload\$", method: this.&getReload ],
       [name: 'clear', regex: ":clear|clear", method: this.&clear ],
-      [name: 'settings', regex: ":get settings", method: this.&showSettings ]
+      [name: 'settings', regex: ":settings", method: this.&showSettings ]
     ]
 
     def f = commands.find{

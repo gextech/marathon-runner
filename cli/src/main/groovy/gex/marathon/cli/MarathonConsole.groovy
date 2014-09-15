@@ -1,7 +1,10 @@
 package gex.marathon.cli
 
+import gex.marathon.cli.config.MarathonConsoleCompleter
 import gex.marathon.core.MarathonRunner
 import gex.marathon.core.MarathonUtils
+import org.jboss.aesh.complete.CompleteOperation
+import org.jboss.aesh.complete.Completion
 import org.jboss.aesh.console.Prompt
 import org.jboss.aesh.console.Console
 import org.jboss.aesh.console.settings.SettingsBuilder
@@ -32,6 +35,8 @@ class MarathonConsole {
     settingsBuilder.mode(options.mode)
 
     console = new Console(settingsBuilder.create());
+
+    console.addCompletion(new MarathonConsoleCompleter());
 
     console.getShell().out().println(getBanner())
 

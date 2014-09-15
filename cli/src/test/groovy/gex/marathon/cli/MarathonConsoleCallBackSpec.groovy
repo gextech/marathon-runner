@@ -17,14 +17,14 @@ class MarathonConsoleCallBackSpec extends Specification {
       }
 
     where:
-      input                 || isNull || expected
-      'quit'                || false  || 'quit'
-      ':quit'               || false  || 'quit'
-      ':set reload true'    || false  || 'reload'
-      ':set reload false'   || false  || 'reload'
-      ':set reload invalid' || true   || 'X'
-      ':get reload' || false   || 'getReload'
-      ':GET RELOAD' || false   || 'getReload'
+      input             || isNull || expected
+      'quit'            || false  || 'quit'
+      ':quit'           || false  || 'quit'
+      ':reload true'    || false  || 'reload'
+      ':reload false'   || false  || 'reload'
+      ':reload invalid' || true   || 'X'
+      ':reload'         || false  || 'getReload'
+      ':RELOAD'         || false  || 'getReload'
   }
 
 }

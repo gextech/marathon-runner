@@ -15,6 +15,9 @@ class MarathonRunner {
   }
 
   MarathonRunner(Map options){
+    if(!options.marathonPath){
+      options.marathonPath = []
+    }
     this.options = options
     buildMarathonRunner(options.marathonPath, options.initModules)
   }

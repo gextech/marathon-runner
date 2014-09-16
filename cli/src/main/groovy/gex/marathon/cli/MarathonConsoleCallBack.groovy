@@ -1,6 +1,5 @@
 package gex.marathon.cli
 
-import gex.marathon.core.MarathonContext
 import gex.marathon.core.MarathonRunner
 import org.jboss.aesh.console.ConsoleCallback
 import org.jboss.aesh.console.ConsoleOperation
@@ -18,18 +17,57 @@ class MarathonConsoleCallBack implements ConsoleCallback {
   PrintWriter writer
   PrintWriter errorWriter
 
-  MarathonConsoleCallBack(Console console, MarathonRunner runner){
+  Boolean reloadContext
+
+  MarathonConsoleCallBack(Console console, MarathonRunner runner, Boolean reloadContext = false){
     this.console = console
     this.runner = runner
+    this.reloadContext = reloadContext
 
-    writer = new PrintWriter(console.getShell().out())
-    errorWriter = new PrintWriter(console.getShell().err())
+    if( console && runner ) {
+      writer = new PrintWriter(console.getShell().out())
+      errorWriter = new PrintWriter(console.getShell().err())
 
-    runner.context.setWriter(writer)
-    runner.context.setErrorWriter(errorWriter)
+      runner.context.setWriter(writer)
+      runner.context.setErrorWriter(errorWriter)
+    }
   }
 
-  def quit  = {
+  @Override
+  public int execute(ConsoleOperation output) {
+    def input = output.getBuffer().trim()
+
+    def f = getMatchWithCommand(input)
+
+    if( f ) {
+      f.method( input =~ f.regex )
+    } else {
+      evaluateExpression(input)
+    }
+
+    return 0;
+  }
+
+  public def getMatchWithCommand(String input){
+
+    def commands = [
+      [name: 'quit', regex: "quit|exit|:quit|:exit|:q", method: this.&quit ],
+      [name: 'prompt', regex: ":prompt (.*)", method: this.&prompt ],
+      [name: 'reload', regex: ":reload (true|false)", method: this.&reload ],
+      [name: 'getReload', regex: ":reload\$", method: this.&getReload ],
+      [name: 'clear', regex: ":clear|clear", method: this.&clear ],
+      [name: 'settings', regex: ":settings", method: this.&showSettings ]
+    ]
+
+    def f = commands.find{
+      def match = input.toLowerCase()  =~ it.regex
+      match.count > 0
+    }
+
+    f
+  }
+
+  def quit(def m){
     try {
       console.stop();
     } catch (IOException e) {
@@ -41,29 +79,30 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     console.setPrompt( new Prompt("[${m[0][1]}] "))
   }
 
-  @Override
-  public int execute(ConsoleOperation output) {
-    def input = output.getBuffer().trim()
-
-    def commands = [
-      [regex: "quit|exit|:quit|:exit|:Q|:q", method: quit ],
-      [regex: ":set prompt (.*)", method: this.&prompt ],
-    ]
-
-    def f = commands.find{
-      def match = input  =~ it.regex
-      match.count > 0
-    }
-
-    if( f ) {
-      f.method( input =~ f.regex )
-    } else {
-      evaluateExpression(input)
-    }
-    return 0;
+  def reload(def m){
+    this.reloadContext = Boolean.parseBoolean(m[0][1])
+    printReloadContextStatus()
   }
 
+  def getReload(def m){
+    printReloadContextStatus()
+  }
 
+  def printReloadContextStatus(){
+    writer.println("Reloading context on each evaluation: $reloadContext")
+    writer.flush()
+  }
+
+  def clear(def m){
+    console.clear()
+  }
+
+  def showSettings(def m){
+    runner.options.each { k, v ->
+      writer.println("$k : $v")
+    }
+    writer.flush()
+  }
 
   private evaluateExpression(String userInput){
     try {
@@ -77,6 +116,9 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     finally {
       writer.flush()
       errorWriter.flush()
+      if(reloadContext){
+        runner = new MarathonRunner(runner.options)
+      }
     }
   }
 

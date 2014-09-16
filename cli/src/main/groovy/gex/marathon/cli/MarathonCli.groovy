@@ -1,6 +1,7 @@
 package gex.marathon.cli
 
 import gex.marathon.cli.config.MarathonOptionsAnalyzer
+import gex.marathon.core.MarathonRunner
 
 public class MarathonCli {
 
@@ -18,15 +19,19 @@ public class MarathonCli {
 
     def marathonOptions = marathonOptionsAnalyzer.parseFromMergingLineAndConfigFile(lineOptions, configFileOptions)
 
+
     if( lineOptions.fileToProcess ){
       def marathonFileProcessor = new MarathonFileProcessor(marathonOptions)
       marathonFileProcessor.processFile(lineOptions.fileToProcess)
     }
     else
     {
-      def marathonConsole = new MarathonConsole(marathonOptions)
+      def marathonConsole = new MarathonConsole(marathonOptions, lineOptions.reloadContext)
       marathonConsole.init()
     }
+
+
+
   }
 
 }

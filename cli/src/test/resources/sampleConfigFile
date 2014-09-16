@@ -1,0 +1,19 @@
+
+
+settings {
+
+  // Mode vi or emacs
+  editMode = 'vi'
+
+  // Path for modules to require
+  marathonPath = '/Users/tsunllly/Documents/Marathon/marathon-runner/core/src/test/resources/node_modules'
+
+  //commentedMarathonPath = '/Users/tsunllly/Documents/Marathon/marathon-runner/core/src/test/resources/node_modules'
+
+  // Map with initial modules to load and their respective paths
+  initModules = 'util,fs:/Users/tsunllly/Documents/Marathon/marathon-runner/core/src/test/resources/other_path/modules,vm'
+
+  // Default path for initial modules if not specified in initModules path
+  initModulesPath = '/Users/tsunllly/Documents/Marathon/marathon-runner/core/src/test/resources/other_path/modules'
+}
+

@@ -1,13 +1,28 @@
 package gex.marathon.core
 
+import gex.marathon.module.MarathonModule
 import gex.marathon.module.MarathonModuleLoader
 
 class MarathonRunner {
   private MarathonCoreEngine engine
   private MarathonModuleLoader loader
   MarathonContext context
+  Map options
 
   MarathonRunner(List<String> marathonPath = [], List<Map> initialModules = null) {
+    this.options = [marathonPath: marathonPath, initModules: initialModules]
+    buildMarathonRunner(marathonPath, initialModules)
+  }
+
+  MarathonRunner(Map options){
+    if(!options.marathonPath){
+      options.marathonPath = []
+    }
+    this.options = options
+    buildMarathonRunner(options.marathonPath, options.initModules)
+  }
+
+  private buildMarathonRunner(List<String> marathonPath = [], List<Map> initialModules = null){
     engine = new MarathonCoreEngine()
     loader = new MarathonModuleLoader(engine, marathonPath, null, false, initialModules)
     context = new MarathonContext(loader: loader, scriptName: '<user>')

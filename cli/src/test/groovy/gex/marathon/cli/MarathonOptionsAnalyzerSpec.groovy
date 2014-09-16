@@ -1,9 +1,10 @@
 package gex.marathon.cli
 
 import gex.marathon.cli.config.MarathonOptionsAnalyzer
+import gex.marathon.core.MarathonUtils
 import spock.lang.*
 
-class MarathonOptionsAnslyzerSpec extends Specification {
+class MarathonOptionsAnalyzerSpec extends Specification {
 
   def "Test filePath as argument works with other options"() {
     given:
@@ -114,5 +115,26 @@ class MarathonOptionsAnslyzerSpec extends Specification {
       ]
   }
 
+  def 'Test reading options from configFile'() {
+    given:
+
+      def filePath = getClass().getResource('/sampleConfigFile').getPath()
+      def configObject = MarathonUtils.parseConfigFile(new File(filePath))
+
+    when:
+      def String[] noArgs = []
+      def m = new MarathonOptionsAnalyzer(noArgs)
+
+    then:
+      m.isOptionInConfigFile(configObject, option) == isPresent
+
+    where:
+      option            || isPresent
+      'editMode'        || true
+      'editingMode'     || false
+      'marathonPath'    || true
+      'initModules'     || true
+      'initModulesPath' || true
+  }
 
 }

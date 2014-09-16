@@ -3,8 +3,6 @@ package gex.marathon.cli
 import gex.marathon.cli.config.MarathonConsoleCompleter
 import gex.marathon.core.MarathonRunner
 import gex.marathon.core.MarathonUtils
-import org.jboss.aesh.complete.CompleteOperation
-import org.jboss.aesh.complete.Completion
 import org.jboss.aesh.console.Prompt
 import org.jboss.aesh.console.Console
 import org.jboss.aesh.console.settings.SettingsBuilder
@@ -32,7 +30,7 @@ class MarathonConsole {
   public init(){
     SettingsBuilder settingsBuilder = new SettingsBuilder()
     settingsBuilder.parseOperators(false)
-    settingsBuilder.mode(options.mode)
+    settingsBuilder.mode(options.editMode )
 
     console = new Console(settingsBuilder.create());
 

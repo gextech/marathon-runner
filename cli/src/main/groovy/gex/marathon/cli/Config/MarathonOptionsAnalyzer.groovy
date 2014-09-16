@@ -94,7 +94,7 @@ class MarathonOptionsAnalyzer {
       editMode:[
         default: Mode.EMACS,
         varArgs: 'editMode',
-        varConfigFile: 'editingMode',
+        varConfigFile: 'editMode',
         converter:  this.&convertToMode
       ],
       marathonPath : [
@@ -134,7 +134,7 @@ class MarathonOptionsAnalyzer {
       }
 
       def finalValue
-      if (optionValue == null) {
+      if (optionValue == null || optionValue == 'DEFAULT') {
         finalValue = v.default
       } else {
         finalValue =  v.converter(optionValue)
@@ -164,6 +164,11 @@ class MarathonOptionsAnalyzer {
 
   List<String> convertToMarathonPath(String value){
     getPathsFromPathVariable(value)
+  }
+
+  static List<Map> convertToInitModules(String initModules){
+    List initList = initModules.split(",")
+    convertToInitModules(initList)
   }
 
   static List<Map> convertToInitModules(List initModules){
@@ -209,6 +214,7 @@ class MarathonOptionsAnalyzer {
       def v = configObject['settings'][optionName]
       result = (v != null) && (v != [:])
     }
+
     result
   }
 
@@ -237,7 +243,7 @@ class MarathonOptionsAnalyzer {
 
   List<String> getPathsFromPathVariable(String pathVariable){
     List<String> paths = []
-    pathVariable?.split(":").each{
+    pathVariable?.split(":").each {
       paths.add(it)
     }
     paths

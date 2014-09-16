@@ -108,12 +108,9 @@ class MarathonConsoleCallBack implements ConsoleCallback {
     try {
       def retValue = runner.eval(userInput)
       runner.invokeMethod("console", "log", retValue)
-    }
-    catch (Exception e){
+    } catch (Exception e){
       e.printStackTrace(errorWriter)
-      runner.invokeMethod("console", "log", error)
-    }
-    finally {
+    } finally {
       writer.flush()
       errorWriter.flush()
       if(reloadContext){

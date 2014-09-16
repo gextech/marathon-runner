@@ -1,10 +1,16 @@
 #!/bin/bash
 
-FILE=cli/build/libs/cli-0.1.0-SNAPSHOT-all.jar
+marathon(){
 
-if [ ! -f "$FILE" ]
-then
+  FILE=cli/build/libs/cli-0.1.0-SNAPSHOT-all.jar
+
+  if [ ! -f "$FILE" ]
+  then
     ./gradlew clean shadowJar
-fi
+  fi
 
-exec java -jar "$FILE" "$@"
+  #exec java -jar "$FILE" "$@"
+}
+
+
+marathon ls default >/dev/null && marathon use default >/dev/null || true

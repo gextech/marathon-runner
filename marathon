@@ -5,4 +5,4 @@ FILE=$(dirname $0)/../libs/cli-${VERSION}-all.jar
 
 java -jar ${FILE} $@
 
-# Yei =) !!!
+# Yei =) =D =)

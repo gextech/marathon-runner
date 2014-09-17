@@ -18,3 +18,71 @@ Now let's list our specific goals:
 * To make reactive extensions interoperable with java
 * Just enough node to run coffee
 
+
+### Marathon CLI
+
+**Usage:** marathon [options] [targetFile]
+
+**Options:**
+
+`-h,--help`
+ Show usage information
+
+ `-config,--config-file <configFile>`
+ Config file to use. If not specified uses ~/.marathon. Command line options has priority over config file ones.
+
+ *Example:* *-config /home/marathon_file.config*
+
+ `-mp,--marathon-path <path>`
+Specifies marathon path used to require modules. If not specified then current directory path is taken, and [current directory]/node_modules and environment variable $MARATHON_PATH
+
+ *Example:* *-mp /one/path:/another/path*
+
+
+ `-im,--init-modules <modules>`
+ List of initial modules to load separated by (,) commas.
+
+ *Example:* *-im                                       $name:$path,fs:/path/fs,vm:/path/vm,domain*
+
+ - If $path is not specified then *--init-modules-path* is taken.
+ - If *--init-modules-path* not specified then it uses the path corresponding to project resources.
+ - Other valid values are *[NONE|DEFAULT]*
+
+`-imp,--init-modules-path <initModulesPath>`
+Path taken in *--init-modules*  when path is not specified explicitly
+
+*Example:* *-imp /path/to/init/modes*
+
+`-mode,--editing-mode <mode>`
+Edition mode [vi|emacs]
+
+*Example:* *-mode vi*
+
+`-r,--reload-context`
+If present, each evaluation is made with a different context
+
+
+**Example of config file (~/.marathon):**
+
+ Command line options has priority over config file ones.
+
+```c
+settings {
+
+  // Mode vi or emacs
+  editMode = 'vi'
+
+  // Path for modules to require
+  marathonPath = '/path/one/node_modules:/path/two/node_modules'
+
+  // Map with initial modules to load and their respective paths
+  initModules = 'fs,mv,domain:/path/domain'
+
+  // Default path for initial modules if not specified in initModules path
+  initModulesPath = '/init/modules/path'
+
+}
+
+```
+
+

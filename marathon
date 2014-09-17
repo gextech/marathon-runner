@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+VERSION=${version}
+FILE=../libs/cli-${VERSION}-all.jar
+
+java -jar ${FILE} $@
+
+# Yei =) !!!

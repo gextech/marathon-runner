@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-VERSION=${version}
-FILE=$(dirname $0)/../libs/cli-${VERSION}-all.jar
+VERSION=0.1.0-SNAPSHOT
+MARATHON_DIR=$(dirname $(dirname $0))
+FILE=$MARATHON_DIR/libs/cli-${VERSION}-all.jar
 
 java -jar ${FILE} $@
 
-# Yei =) =D =)
+# Yei =) !!!

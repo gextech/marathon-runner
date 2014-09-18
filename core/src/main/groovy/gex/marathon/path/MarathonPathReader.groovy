@@ -43,9 +43,28 @@ class MarathonPathReader {
 
   private void setupParentResource(MarathonPathResource parent) {
     parentResource = parent
+
+    Path parentModule
+    Path manifest = parent.path.normalize().parent.resolve("META-INF/MANIFEST.MF")
+    Path packageJson = parent.path.normalize().parent.resolve("package.json")
+
+    if(Files.exists(manifest)) {
+      parentModule = manifest.parent
+    } else if(Files.exists(packageJson)) {
+      parentModule = packageJson.parent
+    }
+
+    if(parentModule) {
+      parent.originPath = parentModule
+    }
+
     if(parent.originPath.fileSystem == FileSystems.default) {
       for(String path in defaultLoadingPaths) {
         path = parent.path.parent.toString() + File.separator + path
+        addPathToList(path, relativePaths)
+      }
+      for(String path in defaultLoadingPaths) {
+        path = parent.originPath.toString() + File.separator + path
         addPathToList(path, relativePaths)
       }
     } else {
@@ -126,7 +145,11 @@ class MarathonPathReader {
 
       pathFile = resolveSubdirPath(p, lookupPath)
       if(pathFile) {
-        return new MarathonPathResource(path: pathFile, originPath: p, originAttributes: attrs)
+        Path originParent = p
+        if(parentResource) {
+          originParent  = parentResource.originPath
+        }
+        return new MarathonPathResource(path: pathFile, originPath: originParent, originAttributes: attrs)
       }
     }
     null

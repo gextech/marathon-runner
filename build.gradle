@@ -1,4 +1,7 @@
+
+def distribution = 'distribution'
 def currentVersion = '0.1.0-SNAPSHOT'
+
 
 subprojects {
     apply plugin: 'groovy'
@@ -51,40 +54,38 @@ allprojects {
     }   
 }
 
+task prepareDist(dependsOn:[':cli:shadowJar']) {
 
-task buildZip(type: Zip, dependsOn:['cli:shadowJar']) {
-  def distribution = 'distribution'
-
-  // Deleting last distribution
-  delete "${buildDir}"
-
-  // Creating file tree
-  def distributionDir = new File(buildDir, distribution)
+    // Creating file tree
+  def distributionDir = new File(buildDir, distribution )
   def bin = new File(buildDir, "${distribution}/bin")
   def libs = new File(buildDir, "${distribution}/libs")
   distributionDir.mkdirs()
   bin.mkdirs()
   libs.mkdirs()
 
-  // Copying jar to libs
-  copy {
-    from "cli/build/libs/cli-${currentVersion}-all.jar"
-    into "${buildDir}/${distribution}/libs/"
+  doLast {
+    // Copy fat jar to lib
+    def file = new File("${projectDir}", "cli/build/libs/cli-${currentVersion}-all.jar");
+    File dir = new File("${buildDir}/${distribution}/libs");
+    file.renameTo(new File(dir, file.getName()));
+
+    // Generates bash file from template
+    def marathonFile = new File("${projectDir}", 'marathon')
+    def x = marathonFile.text.replace('${version}', "${currentVersion}")
+
+    def marathon = new File("${buildDir}/${distribution}/bin/", "marathon")
+    marathon.withWriter { it << x }
+
+    marathon.setReadable(true);
+    marathon.setReadable(true);
+    marathon.setExecutable(true, false);
   }
+}
 
-  // Creating marathon from template and copying to bin
-  copy {
-    from "marathon"
-    into "${buildDir}/${distribution}/bin/"
-  }
 
-  def marathonFile = new File('marathon')
-  def x = marathonFile.text.replace('${version}', "${currentVersion}")
-
-  def marathon = new File("${buildDir}/${distribution}/bin/", "marathon")
-  marathon.withWriter{ it << x }
-
+task buildZip(type:Zip, dependsOn:['prepareDist']) {
   from "${buildDir}/${distribution}"
   archiveName "${buildDir}/marathon.zip"
-
 }
+

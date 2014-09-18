@@ -31,6 +31,7 @@ class MarathonRunner {
   MarathonContext evalModule(String moduleName, String code) {
     MarathonContext context = new MarathonContext(loader: loader, scriptName: moduleName)
 
+    context.module = new MarathonModule(moduleName)
     engine.evalModule(code, context)
 
     context

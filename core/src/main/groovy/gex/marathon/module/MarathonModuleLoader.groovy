@@ -108,7 +108,7 @@ class MarathonModuleLoader {
     MarathonPathResource result
     reader.addExtensions(extensionLoaders.keySet())
     result = reader.resolvePath(requirePath)
-      
+
     if(result && result.isDirectory() && !requirePath.startsWith(".")) {
       MarathonPathResource metaInf = reader.resolvePath("${requirePath}/META-INF/MANIFEST.MF")
       MarathonPathResource packageJson = reader.resolvePath("${requirePath}/package.json")

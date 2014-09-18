@@ -14,6 +14,7 @@ import java.util.jar.JarFile
 class MarathonPathReader {
   private static final Attributes.Name PACKAGE_NAME = new Attributes.Name("Npm-Name")
 
+  private List stringGlobalPaths
   private List globalPaths
   private List relativePaths
   private Map jars
@@ -24,6 +25,7 @@ class MarathonPathReader {
 
   MarathonPathReader(MarathonPathResource parentResource = null) {
     globalPaths = new ArrayList<Path>()
+    stringGlobalPaths = new ArrayList<String>()
     relativePaths = new ArrayList<Path>()
     jars = new HashMap()
 
@@ -61,6 +63,7 @@ class MarathonPathReader {
 
   void addPath(String path) {
     addPathToList(path, globalPaths)
+    stringGlobalPaths.add(path)
   }
 
   void clearPath() {
@@ -79,6 +82,7 @@ class MarathonPathReader {
         attrs.put("prependPath", "true")
         def fs = FileSystems.newFileSystem(p, null)
         p = fs.getPath(fs.separator)
+        println attrs
         jars.put(fs, attrs)
         paths.add(p)
       }
@@ -158,7 +162,7 @@ class MarathonPathReader {
   }
 
   List getGlobalPaths() {
-    globalPaths
+    stringGlobalPaths
   }
 
 }

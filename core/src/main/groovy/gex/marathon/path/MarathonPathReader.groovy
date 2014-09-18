@@ -82,7 +82,6 @@ class MarathonPathReader {
         attrs.put("prependPath", "true")
         def fs = FileSystems.newFileSystem(p, null)
         p = fs.getPath(fs.separator)
-        println attrs
         jars.put(fs, attrs)
         paths.add(p)
       }

@@ -28,6 +28,14 @@ class MarathonRunner {
     context = new MarathonContext(loader: loader, scriptName: '<user>')
   }
 
+  MarathonContext evalModule(String moduleName, String code) {
+    MarathonContext context = new MarathonContext(loader: loader, scriptName: moduleName)
+
+    engine.evalModule(code, context)
+
+    context
+  }
+
   Object eval(String code) {
     engine.evalGlobal(code, context)
   }

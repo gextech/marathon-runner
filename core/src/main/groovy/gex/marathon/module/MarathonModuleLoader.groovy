@@ -25,6 +25,7 @@ class MarathonModuleLoader {
 
   MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false, List<Map> initialModules = null) {
     this.engine = engine
+    this.resource = resource
     extensionLoaders = new HashMap()
     moduleCache = new HashMap()
     reader = new MarathonPathReader(resource)
@@ -120,6 +121,7 @@ class MarathonModuleLoader {
   }
 
   MarathonModule require(String requirePath) {
+
     if(moduleCache.containsKey(requirePath)) {
       return moduleCache.get(requirePath)
     }

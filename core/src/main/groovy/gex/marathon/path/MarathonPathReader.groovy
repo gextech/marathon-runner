@@ -109,7 +109,7 @@ class MarathonPathReader {
 
   public MarathonPathResource resolvePath(String path) {
     MarathonPathResource result
-    if(path.startsWith("./") && parentResource) {
+    if((path.startsWith("./") || path.startsWith("../")) && parentResource) {
       def fs = parentResource.originPath.fileSystem
       Path rootPath
       rootPath = parentResource.path
@@ -170,9 +170,6 @@ class MarathonPathReader {
       def result = p.resolve(path + it)
       if(Files.exists(result)) {
         def relativePath = p.toAbsolutePath().relativize(result.toAbsolutePath())
-        if(relativePath.toString().contains("..")) {
-          throw new SecurityException("You are trying to access a resource ${path} outside marathon path ${p}")
-        }
         return result
       }
     }

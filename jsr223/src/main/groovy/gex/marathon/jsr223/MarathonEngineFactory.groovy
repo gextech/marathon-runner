@@ -23,7 +23,7 @@ class MarathonEngineFactory implements ScriptEngineFactory {
 
   @Override
   String getEngineVersion() {
-    "0.1.0"
+    "0.1.1"
   }
 
   @Override

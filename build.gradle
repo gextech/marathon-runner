@@ -1,6 +1,6 @@
 
 def distribution = 'distribution'
-def currentVersion = '0.1.0-SNAPSHOT'
+def currentVersion = '0.1.1-SNAPSHOT'
 
 
 subprojects {

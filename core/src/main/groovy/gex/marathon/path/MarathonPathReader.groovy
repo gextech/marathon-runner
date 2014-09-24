@@ -107,8 +107,9 @@ class MarathonPathReader {
     }
   }
 
-  public MarathonPathResource resolvePath(String path) {
+  public MarathonPathResource resolvePath(String path, MarathonPathResource loadParent = null) {
     MarathonPathResource result
+
     if((path.startsWith("./") || path.startsWith("../")) && parentResource) {
       def fs = parentResource.originPath.fileSystem
       Path rootPath
@@ -116,17 +117,17 @@ class MarathonPathReader {
       if(Files.isRegularFile(rootPath)) {
         rootPath = rootPath.parent
       }
-      result = resolvePathInPaths(path, [rootPath])
+      result = resolvePathInPaths(path, [rootPath], loadParent)
     } else {
-      result = resolvePathInPaths(path, relativePaths)
+      result = resolvePathInPaths(path, relativePaths, loadParent)
       if(!result) {
-        result = resolvePathInPaths(path, globalPaths)
+        result = resolvePathInPaths(path, globalPaths, loadParent)
       }
     }
     result
   }
   
-  private MarathonPathResource resolvePathInPaths(String path, List<Path> paths) {
+  private MarathonPathResource resolvePathInPaths(String path, List<Path> paths, MarathonPathResource loadParent = null) {
     Path pathFile
     for(Path p in paths) {
       String lookupPath = path
@@ -146,7 +147,12 @@ class MarathonPathReader {
       pathFile = resolveSubdirPath(p, lookupPath)
       if(pathFile) {
         Path originParent = p
-        if(parentResource) {
+        Path modules = pathFile.resolve("node_modules")
+        if(loadParent) {
+          originParent  = loadParent.originPath
+        } else if(Files.exists(modules)) {
+          originParent = pathFile
+        } else if(parentResource) {
           originParent  = parentResource.originPath
         }
         return new MarathonPathResource(path: pathFile, originPath: originParent, originAttributes: attrs)

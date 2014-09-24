@@ -81,7 +81,9 @@ class MarathonModuleLoader {
   private MarathonPathResource requireMainResource(
     String requirePath,
     MarathonPathResource metaInf,
-    MarathonPathResource packageJson) {
+    MarathonPathResource packageJson,
+    MarathonPathResource parentResource = null) {
+
     def mainPath
     if(metaInf) {
       def manifest = new Manifest(metaInf.inputStream)
@@ -102,7 +104,7 @@ class MarathonModuleLoader {
       mainPath = "${requirePath}/index.js"
     }
 
-    return reader.resolvePath(mainPath)
+    return reader.resolvePath(mainPath, parentResource)
   }
 
   MarathonPathResource requireResource(String requirePath) {
@@ -114,7 +116,7 @@ class MarathonModuleLoader {
       MarathonPathResource metaInf = reader.resolvePath("${requirePath}/META-INF/MANIFEST.MF")
       MarathonPathResource packageJson = reader.resolvePath("${requirePath}/package.json")
 
-      result = requireMainResource(requirePath, metaInf, packageJson)
+      result = requireMainResource(requirePath, metaInf, packageJson, result)
     }
 
     result

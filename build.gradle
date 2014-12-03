@@ -1,63 +1,86 @@
-
 def distribution = 'distribution'
-def currentVersion = '0.1.2-SNAPSHOT'
+def currentVersion = '0.1.4-SNAPSHOT'
 
 
 subprojects {
-    apply plugin: 'groovy'
-    apply plugin: 'maven'
+  apply plugin: 'groovy'
+  apply plugin: 'maven'
+  apply plugin: 'java'
 
-    version = currentVersion
-    group = 'gex.marathon'
+  version = currentVersion
+  group = 'gex.marathon'
 
-    sourceCompatibility = '1.8'
+  sourceCompatibility = '1.8'
 
-    dependencies {
-        compile 'org.codehaus.groovy:groovy-all:2.3.6'
-        testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
-    }   
+  dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.3.6'
+    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+  }
 
-    def deploymentRepo = version.endsWith("-SNAPSHOT")?"http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/snapshots/":
-        "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
+  def deploymentRepo = version.endsWith("-SNAPSHOT") ? "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/snapshots/" :
+    "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
 
-    def username
-    def password
+  def username
+  def password
 
-    if(project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')) {
-        username = project['nexusUsername']
-        password = project['nexusPassword']
+  if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')) {
+    username = project['nexusUsername']
+    password = project['nexusPassword']
+  }
+
+
+  sourceSets {
+    main {
+      groovy {
+        srcDir 'src/main'
+      }
     }
+    test {
+      groovy {
+        srcDir 'src/test'
+      }
+    }
+  }
 
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                repository(url: deploymentRepo) {
-                    authentication(userName: username, password: password)
-                }
-                pom.version = project.version
-                pom.artifactId = project.name
-                pom.groupId = project.group
-            }
+  task myJar(type: Jar){
+    from sourceSets.main.allSource
+  }
+
+  artifacts {
+    archives myJar
+  }
+
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        repository(url: deploymentRepo) {
+          authentication(userName: username, password: password)
         }
+        pom.version = project.version
+        pom.artifactId = project.name
+        pom.groupId = project.group
+      }
     }
+  }
+
 }
 
 allprojects {
-    repositories {
-        mavenCentral()
-        mavenLocal()
+  repositories {
+    mavenCentral()
+    mavenLocal()
 
-        maven {
-            name "expansion"
-            url "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
-        }   
-    }   
+    maven {
+      name "expansion"
+      url "http://nexus.plataforma.virginia.exp.mx/nexus/content/repositories/releases/"
+    }
+  }
 }
 
-task prepareDist(dependsOn:[':cli:shadowJar']) {
+task prepareDist(dependsOn: [':cli:shadowJar']) {
 
-    // Creating file tree
-  def distributionDir = new File(buildDir, distribution )
+  // Creating file tree
+  def distributionDir = new File(buildDir, distribution)
   def bin = new File(buildDir, "${distribution}/bin")
   def libs = new File(buildDir, "${distribution}/libs")
   distributionDir.mkdirs()
@@ -84,8 +107,7 @@ task prepareDist(dependsOn:[':cli:shadowJar']) {
 }
 
 
-task buildZip(type:Zip, dependsOn:['prepareDist']) {
+task buildZip(type: Zip, dependsOn: ['prepareDist']) {
   from "${buildDir}/${distribution}"
   archiveName "${buildDir}/marathon.zip"
 }
-

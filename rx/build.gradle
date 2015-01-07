@@ -11,7 +11,7 @@ buildscript {
 
 dependencies {
     compile( project( ':core' ) )
-    compile 'io.reactivex:rxjava:1.0.0-rc.3'
+    compile 'io.reactivex:rxjava:1.0.4'
 }
 
 watch {

@@ -45,7 +45,7 @@ class MarathonConsole {
   }
 
   private String getBanner(){
-    MarathonUtils.readResource('/banner')
+    this.getClass().getResourceAsStream('/banner').text
   }
 
 }

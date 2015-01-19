@@ -14,7 +14,7 @@ class MarathonRxUtilsSpec extends Specification {
       def conditions = new PollingConditions(timeout: 5)
       def runner = new MarathonRunner(['src/test/resources/node_modules'])
 
-      def jsObservable = MarathonRxUtils.fromJava(runner, oneObservable)
+      def jsObservable = (new MarathonRxUtils()).fromJava(runner, oneObservable)
       runner.put("theObservable", jsObservable)
 
       runner.eval("""
@@ -43,7 +43,7 @@ class MarathonRxUtilsSpec extends Specification {
       def conditions = new PollingConditions(timeout: 5)
       def runner = new MarathonRunner(['src/test/resources/node_modules'])
       def observable = runner.eval("require('rx/dist/rx.all').Observable.return(42)")
-      def javaObservable = MarathonRxUtils.toJava(runner, observable)
+      def javaObservable = (new MarathonRxUtils()).toJava(runner, observable)
 
     then:
       javaObservable.toBlocking().first() == 42

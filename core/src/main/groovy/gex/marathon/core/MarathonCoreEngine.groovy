@@ -19,19 +19,21 @@ class MarathonCoreEngine {
 
   private ScriptEngine scriptEngine
   private Bindings commonBindings
+  private ResourceLoader resourceLoader
 
   MarathonCoreEngine() {
     ScriptEngineManager engineManager = new ScriptEngineManager() 
     this.scriptEngine = engineManager.getEngineByName("nashorn")
     contextStack = new ArrayList()
+    resourceLoader = new ResourceLoader()
     loadDefault()
+
   }
 
   private void loadDefault() {
-    List<String> defaults = ["/marathon/init/shim.js"] 
+    List<String> defaults = ["/marathon/init/shim.js"]
     defaults.each {
-      def source = MarathonUtils.readResource(it)
-      scriptEngine.eval(source)
+      scriptEngine.eval(resourceLoader.getInputStream(it).text)
     }
     commonBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
   }
@@ -220,14 +222,14 @@ class MarathonCoreEngine {
 
 
   private String getRequireCode(){
-    String require = MarathonUtils.readResource("/marathon/module/globalRequire.js").replaceAll("\n", " ")
+    String require = resourceLoader.getInputStream("/marathon/module/globalRequire.js").text.replaceAll("\n", " ")
     require
   }
 
 
   private String prepareEvalCode(String code) {
-    String prefix = MarathonUtils.readResource("/marathon/module/prefix.js").replaceAll("\n", " ")
-    String suffix = MarathonUtils.readResource("/marathon/module/evalSuffix.js")
+    String prefix = resourceLoader.getInputStream("/marathon/module/prefix.js").text.replaceAll("\n", " ")
+    String suffix = resourceLoader.getInputStream("/marathon/module/evalSuffix.js").text
     StringBuilder builder = new StringBuilder()
     builder.append(prefix)
     builder.append(" return ")
@@ -237,8 +239,8 @@ class MarathonCoreEngine {
   }
 
   private String prepareCode(String code) {
-    String prefix = MarathonUtils.readResource("/marathon/module/prefix.js").replaceAll("\n", " ")
-    String suffix = MarathonUtils.readResource("/marathon/module/suffix.js")
+    String prefix = resourceLoader.getInputStream("/marathon/module/prefix.js").text.replaceAll("\n", " ")
+    String suffix = resourceLoader.getInputStream("/marathon/module/suffix.js").text
     StringBuilder builder = new StringBuilder()
     builder.append(prefix)
     builder.append(code)

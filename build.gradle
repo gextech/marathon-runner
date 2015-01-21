@@ -1,5 +1,5 @@
 def distribution = 'distribution'
-def currentVersion = '0.1.4-SNAPSHOT'
+def currentVersion = '0.1.5-SNAPSHOT'
 
 apply plugin: 'java'
 

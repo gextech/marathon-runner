@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=0.1.2-SNAPSHOT
+VERSION=0.1.5-SNAPSHOT
 MARATHON_DIR=$(dirname $(dirname $0))
 FILE=$MARATHON_DIR/libs/cli-${VERSION}-all.jar
 

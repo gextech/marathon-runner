@@ -3,6 +3,7 @@ package gex.marathon.module
 import gex.marathon.core.MarathonContext
 import gex.marathon.core.MarathonCoreEngine
 import gex.marathon.core.MarathonUtils
+import gex.marathon.core.ResourceLoader
 import gex.marathon.path.MarathonPathReader
 import gex.marathon.path.MarathonPathResource
 
@@ -17,6 +18,7 @@ class MarathonModuleLoader {
   private MarathonPathResource resource
   private MarathonPathReader reader
   private MarathonCoreEngine engine
+  private ResourceLoader resourceLoader
 
   Map<String, Object> extensionLoaders
 
@@ -24,7 +26,9 @@ class MarathonModuleLoader {
 
 
   MarathonModuleLoader(MarathonCoreEngine engine, List<String> paths=[], MarathonPathResource resource = null, boolean coreModule = false, List<Map> initialModules = null) {
+    resourceLoader = new ResourceLoader()
     this.engine = engine
+    this.resource = resource
     extensionLoaders = new HashMap()
     moduleCache = new HashMap()
     reader = new MarathonPathReader(resource)
@@ -46,7 +50,7 @@ class MarathonModuleLoader {
 
 
   private void loadDefaultModules() {
-    List<String> defaultModules = Arrays.asList(MarathonUtils.readResource("/marathon/modules/defaultLoads").split("\n"))
+    List<String> defaultModules = Arrays.asList(resourceLoader.getInputStream("/marathon/modules/defaultLoads").text.split("\n"))
     defaultModules.each {
       loadInitModuleFromResources(it)
     }
@@ -72,7 +76,7 @@ class MarathonModuleLoader {
   }
 
   private void loadInitModuleFromResources(String moduleName){
-    def code = MarathonUtils.readResource("${DEFAULT_MODULES_PATH}/${moduleName}.js")
+    def code = resourceLoader.getInputStream("${DEFAULT_MODULES_PATH}/${moduleName}.js").text
     def result = compileJs(moduleName, code, true)
     moduleCache.put(moduleName, result)
   }
@@ -80,7 +84,9 @@ class MarathonModuleLoader {
   private MarathonPathResource requireMainResource(
     String requirePath,
     MarathonPathResource metaInf,
-    MarathonPathResource packageJson) {
+    MarathonPathResource packageJson,
+    MarathonPathResource parentResource = null) {
+
     def mainPath
     if(metaInf) {
       def manifest = new Manifest(metaInf.inputStream)
@@ -101,7 +107,7 @@ class MarathonModuleLoader {
       mainPath = "${requirePath}/index.js"
     }
 
-    return reader.resolvePath(mainPath)
+    return reader.resolvePath(mainPath, parentResource)
   }
 
   MarathonPathResource requireResource(String requirePath) {
@@ -109,17 +115,18 @@ class MarathonModuleLoader {
     reader.addExtensions(extensionLoaders.keySet())
     result = reader.resolvePath(requirePath)
 
-    if(result && result.isDirectory() && !requirePath.startsWith(".")) {
+    if(result && result.isDirectory()) {
       MarathonPathResource metaInf = reader.resolvePath("${requirePath}/META-INF/MANIFEST.MF")
       MarathonPathResource packageJson = reader.resolvePath("${requirePath}/package.json")
 
-      result = requireMainResource(requirePath, metaInf, packageJson)
+      result = requireMainResource(requirePath, metaInf, packageJson, result)
     }
 
     result
   }
 
   MarathonModule require(String requirePath) {
+
     if(moduleCache.containsKey(requirePath)) {
       return moduleCache.get(requirePath)
     }

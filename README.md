@@ -18,10 +18,26 @@ Now let's list our specific goals:
 * To make reactive extensions interoperable with java
 * Just enough node to run coffee
 
+### Gradle Tasks
+`gradle cli:shadowJar` It produces the fat jar
+
+`gradle prepareDist` It copy the fat jar and adjust script with current versions
+
+`gradle buildZip` It build a zip ready to use under build directory.
+
+├── distribution
+
+├───  bin
+
+└── ── marathon
+
+└── libs
+
+└── ── cli-0.1.1-SNAPSHOT-all.jar
 
 ### Marathon CLI
 
-**Usage:** marathon [options] [targetFile]
+**Usage:** bin/marathon [options] [targetFile]
 
 **Options:**
 
